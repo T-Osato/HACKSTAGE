@@ -6,17 +6,14 @@
     <title>ログインページ</title>
 </head>
 <body>
-    <h1>ログインページ</h1>
-    <form action="{{url_for('login')}}" method="POST">
+    <h1>アカウント登録ページ</h1>
+    <form action="{{url_for('signup')}}" method="POST">
         <label for="username">ユーザー名</label>
         <input type="text" name="username" required>
         <label for="password">パスワード</label>
         <input type="password" name="password" required>
-        <input type="submit" value="ログイン">
+        <input type="submit" value="新規登録">
     </form>
 
-    <form action="{{url_for('signup')}}">
-        <input type="submit" value="サインアップ">
-    </form>
 </body>
 </html>
