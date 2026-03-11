@@ -1,0 +1,31 @@
+/* 三本線の見た目調整 */
+.menu-icon {
+    font-size: 30px; /* 文字の大きさ */
+    cursor: pointer; /* マウスを乗せたら指マークにする */
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+/* メニューの初期状態（画面左側に隠す） */
+.nav-menu {
+    position: fixed;
+    top: 0;
+    left: -200px; /* 完全に画面の外へ */
+    width: 200px;
+    height: 100vh;
+    background-color: #333;
+    color: white;
+    transition: 0.4s; /* 動きの速さ */
+    padding-top: 60px;
+}
+
+/* JSでこのクラスがついたら画面に現れる */
+.nav-menu.open {
+    left: 0;
+}
+
+/* メニュー内の文字装飾 */
+.nav-menu ul { list-style: none; padding: 0; }
+.nav-menu li a { color: white; text-decoration: none; display: block; padding: 15px; }
