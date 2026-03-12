@@ -1,31 +1,132 @@
-/* 三本線の見た目調整 */
+/* --- 全体レイアウト --- */
+body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    margin: 0;
+    background-color: #f9f9f9;
+}
+
+/* --- ヘッダー（上部バー） --- */
+header {
+    background-color: #ccc;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding-left: 60px; /* メニューアイコンと重ならないように */
+
+    position: relative;      /* 画面の特定の位置に固定 */
+    top: 0;               /* 一番上に配置 */
+    left: 0;              /* 左端に配置 */
+    width: 100%;          /* 横幅いっぱい */
+    z-index: 80;          /* カレンダーより上に表示されるように調整 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* 浮いている感じを出す*/
+}
+
+/* --- サイドメニュー --- */
 .menu-icon {
-    font-size: 30px; /* 文字の大きさ */
-    cursor: pointer; /* マウスを乗せたら指マークにする */
+    font-size: 30px;
+    cursor: pointer;
     position: fixed;
-    top: 20px;
+    top: 15px;
     left: 20px;
     z-index: 100;
 }
 
-/* メニューの初期状態（画面左側に隠す） */
 .nav-menu {
     position: fixed;
     top: 0;
-    left: -200px; /* 完全に画面の外へ */
+    left: -200px;
     width: 200px;
     height: 100vh;
     background-color: #333;
     color: white;
-    transition: 0.4s; /* 動きの速さ */
+    transition: 0.4s;
     padding-top: 60px;
+    z-index: 90;
 }
 
-/* JSでこのクラスがついたら画面に現れる */
 .nav-menu.open {
     left: 0;
 }
 
-/* メニュー内の文字装飾 */
 .nav-menu ul { list-style: none; padding: 0; }
 .nav-menu li a { color: white; text-decoration: none; display: block; padding: 15px; }
+
+/* --- カレンダー全体のコンテナ --- */
+.calendar {
+    margin: 100px auto 40px;
+    max-width: 500px;
+    margin: 40px auto;
+    background: white;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+/* カレンダーヘッダー（年月・ボタン） */
+.calendar-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 20px;
+}
+
+.calendar-header h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    min-width: 150px;
+    text-align: center;
+}
+
+button {
+    cursor: pointer;
+    padding: 5px 15px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: #f0f0f0;
+}
+
+/* --- グリッド構造 --- */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7列 */
+    gap: 2px;
+    text-align: center;
+}
+
+.dates-container {
+    display: contents; /* JavaScriptで生成される日付を親グリッドに従わせる */
+}
+
+/* 曜日と日付の共通スタイル */
+.day, .day-name {
+    aspect-ratio: 1 / 1; /* 正方形にする */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+/* 曜日の見た目 */
+.day-name {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    color: #555;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+/* 日付の枠線 */
+.day {
+    border: 1px solid #fcfcfc;
+}
+
+/* --- 色の調整（nth-childのズレ対応） --- */
+
+/* 日曜日は1列目：day-name(1) と day(7n+1から空白分を考慮) */
+/* JavaScriptで空白を入れている場合、シンプルに列で指定するのが確実です
