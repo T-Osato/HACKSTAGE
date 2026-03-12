@@ -53,7 +53,7 @@ header {
 
 /* --- カレンダー全体のコンテナ --- */
 .calendar {
-    margin: 100px auto 40px;
+    margin: 100px auto 40px 20px;
     max-width: 500px;
     margin: 40px auto;
     background: white;
@@ -126,7 +126,3 @@ button:hover {
     border: 1px solid #fcfcfc;
 }
 
-/* --- 色の調整（nth-childのズレ対応） --- */
-
-/* 日曜日は1列目：day-name(1) と day(7n+1から空白分を考慮) */
-/* JavaScriptで空白を入れている場合、シンプルに列で指定するのが確実です
