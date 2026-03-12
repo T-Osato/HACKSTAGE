@@ -54,10 +54,23 @@ body::before {
     color: white;
 }
 
+/* タイトルを「登録」ボタンの質感に合わせる */
 .signup-box h2 {
+    /* 1. フォントの種類をボタンと同じにする */
+    font-family: inherit; 
+    
+    /* 2. 太さをボタン（Bold）に合わせる */
+    font-weight: bold;
+    
+    /* 3. ボタンと同じ文字間隔にする（画像だと少しパキッとしていたので） */
+    letter-spacing: 0.05em;
+
+    /* 4. タイトルなのでサイズはボタンより少し大きく */
+    font-size: 24px;
+    
+    /* 余白の調整 */
+    margin-top: 0;
     margin-bottom: 20px;
-    font-weight: 300;
-    letter-spacing: 2px;
 }
 
 /* --- フラッシュメッセージ (通知) --- */
