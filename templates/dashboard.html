@@ -8,15 +8,42 @@
 </head>
 <body>
     <header>
-        <div id="js-button" class="menu-icon">&#9776;</div>
+        <div id="js-button" class="menu-icon">
+            <a>&#9776;</a>
+            <span>マイページ</span>
+            <span>○○さん</span>
+        </div>
 
+        <!--　隠れメニュー　三マーク押したら表示 -->
         <nav id="js-nav" class="nav-menu">
             <ul><a href="#">ホーム</a></ul>
             <ul><a href="#">設定</a></ul>
         </nav>
 
-        <script src="../static/js/dashboard_script.js"></script>
+        
     </header>
 
+    <!--カレンダー表示-->
+
+    <div class="calendar">
+        <div class="calendar-header">
+            <button id="prev">&lt;</button>
+            <h2 id="monthYear"></h2>
+            <button id="next">&gt;</button>
+        </div>
+
+        <div class="calendar-grid">
+            <div class="day-name">日</div>
+            <div class="day-name">月</div>
+            <div class="day-name">火</div>
+            <div class="day-name">水</div>
+            <div class="day-name">木</div>
+            <div class="day-name">金</div>
+            <div class="day-name">土</div>
+            <div id="calendarDates" class="dates-container"></div>
+        </div>
+    </div>
+
+    <script src="../static/js/dashboard_script.js"></script>
 </body>
 </html>
