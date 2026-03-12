@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Flask,render_template,request, redirect, url_for
+from flask import Flask,render_template,request, redirect, url_for, flash
 
 #SQLAlchemyをインポート
 from flask_sqlalchemy import SQLAlchemy
@@ -84,7 +84,12 @@ def signup():
         password = request.form.get('password')
             #request.form.get : ブラウザから送られてきたPOSTデータの中から、特定のキーに対応する値を取り出す
 
-
+        #最適化：既存のユーザーの重複チェック
+        existing_user = User.query.filter_by(student_id=student_id).first()
+        if existing_user:
+            flash("その学籍番号は既に登録されています")
+            return redirect(url_for('signup'))
+        
         #Userのインスタンスを作成
         user = User(student_id=student_id,name=name, password=generate_password_hash(password))
         db.session.add(user)
@@ -96,7 +101,7 @@ def signup():
     #---------------------------------------------------------------------#
 
 #ログイン
-@app.route('/login', methods=['GET','POST'])
+@app.route('/', methods=['GET','POST'])
 def login():
     if request.method == "GET":
         return render_template("login.html")
@@ -127,15 +132,6 @@ def logout():
 
 #---------------------------------------------------------------------#
 
-#「/」にアクセスがあった場合のルーティング
-@app.route("/")
-def index():
-    if current_user.is_authenticated:
-        #ログイン済みなら、マイページに飛ばす
-        return redirect(url_for("dashboard"))
-    else:
-        #未ログインなら、ログイン/サインアップの選択画面を出す
-        return render_template("landing.html")
 
 @app.route("/dashboard")
 def dashboard():
