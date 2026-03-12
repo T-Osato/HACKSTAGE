@@ -8,13 +8,20 @@
 <body>
     <h1>ログインページ</h1>
     <form action="{{url_for('login')}}" method="POST">
-        <label for="student_id">学籍番号</label>
-        <input type="text" name="student_id" required>
-
-        <label for="password">パスワード</label>
-        <input type="password" name="password" required>
+        <div>
+           <label for="student_id">学籍番号</label>
+            <input type="text" name="student_id" required> 
+        </div>
         
-        <input type="submit" value="ログイン">
+        <div>
+            <label for="password">パスワード</label>
+            <input type="password" name="password" required>
+        </div>
+        
+        <div>
+            <input type="submit" value="ログイン">
+        </div>
+        
     </form>
 
     <form action="{{url_for('signup')}}">
