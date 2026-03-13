@@ -8,9 +8,11 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 75px;
     background: linear-gradient(135deg, #eaf6ff, #cfeeff, #a8ddff);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1100;
+    /* Always on top */
 }
 
 /*ヘッダー左側*/
@@ -23,8 +25,48 @@
 
 /*メニューボタン*/
 .menu-button {
-    font-size: 25px;
+    width: 30px;
+    height: 22px;
+    position: relative;
     cursor: pointer;
+}
+
+.menu-button span {
+    position: absolute;
+    width: 100%;
+    height: 3px;
+    background: #333;
+    border-radius: 2px;
+    transition: 0.3s;
+}
+
+/*バーの配置*/
+.menu-button span:nth-child(1) {
+    top: 0;
+}
+
+.menu-button span:nth-child(2) {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.menu-button span:nth-child(3) {
+    bottom: 0;
+}
+
+/* × に変わる */
+.menu-button.active span:nth-child(1) {
+    transform: rotate(45deg);
+    top: 9px;
+}
+
+.menu-button.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.menu-button.active span:nth-child(3) {
+    transform: rotate(-45deg);
+    bottom: 10px;
 }
 
 /*マイページタイトル*/
@@ -42,7 +84,9 @@
 }
 
 /*ユーザーアイコン*/
-.user-icon {
+.user-icon img {
+    object-fit: cover;
+    display: block;
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -66,4 +110,81 @@
     background: rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
     transform: translateY(-1px);
+}
+
+/*サイドメニュー*/
+.overlay {
+    position: fixed;
+    top: 75px;
+    /* Avoid header */
+    left: 0px;
+    width: 100%;
+    height: calc(100vh - 75px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    /* Premium feel */
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.4s ease;
+    z-index: 1000;
+}
+
+.sidemenu {
+    top: 75px;
+    position: fixed;
+    left: -280px;
+    width: 280px;
+    height: calc(100vh - 75px);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
+    transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1010;
+    padding-top: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/*サイドメニューの表示*/
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidemenu.active {
+    left: 0;
+}
+
+/* メニューリストの装飾 */
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.bottom-menu {
+    margin-top: auto;
+    margin-bottom: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sidemenu li {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sidemenu li a {
+    display: block;
+    padding: 15px 25px;
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.sidemenu li a:hover {
+    background: rgba(168, 221, 255, 0.2);
+    color: #0077c2;
+    padding-left: 35px;
 }

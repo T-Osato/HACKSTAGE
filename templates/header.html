@@ -4,41 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../static/css/header_style.css">
+    <title>document.header</title>
 </head>
-<!--ヘッダー-->
-<header class="header">
-    <div class="header-left">
-        <!--メニューボタン-->
-        <div id="menu-button" class="menu-button">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        <!--マイページタイトル-->
-        <h2 onclick="to_mypage()" class="site-title">
-            <span id="user-name" class="name"></span>のマイページ
-        </h2>
-    </div>
-    <div class="header-right">
-        <!--ユーザーアイコン-->
-        <div class="user-icon">
-            <img src="../static/img/user_icon.png" alt="user-icon" onclick="to_setting()">
-        </div>
-        <!--ログアウトボタン-->
-        <button type="button" onclick="logout()" class="logout-button">logout</button>
-    </div>
-</header>
 
-<!--サイドメニュー-->
-<div id="overlay">
-    <div id="sidemenu">
-        <ul>
+<body>
+    <!--ヘッダー-->
+    <header class="header">
+        <div class="header-left">
+            <!--メニューボタン-->
+            <div id="menu-button" class="menu-button">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <!--マイページタイトル-->
+            <h2 onclick="to_mypage()" class="site-title">
+                <span id="user-name" class="name"></span>のマイページ
+            </h2>
+        </div>
+        <div class="header-right">
+            <!--ユーザーアイコン-->
+            <div class="user-icon">
+                <img src="../static/img/user_icon.png" alt="user-icon" onclick="to_setting()">
+            </div>
+            <!--ログアウトボタン-->
+            <button type="button" onclick="logout()" class="logout-button">logout</button>
+        </div>
+    </header>
+
+    <!--サイドメニュー-->
+    <div id="overlay" class="overlay">
+    </div>
+    <div id="sidemenu" class="sidemenu">
+        <ul class="menu-list">
             <li><a href="#">ダッシュボード</a></li>
+            <li><a href="#">掲示板</a></li>
+            <li><a href="#">予定</a></li>
+            <li><a href="#">チャレンジ</a></li>
+        </ul>
+        <ul class="menu-list bottom-menu">
             <li><a href="#">個人設定</a></li>
             <li><a href="#">ログアウト</a></li>
         </ul>
     </div>
-</div>
-<script src="../static/js/header_script.js"></script>
+
+    <script src="../static/js/header_script.js"></script>
+</body>
 
 </html>
