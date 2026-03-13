@@ -4,8 +4,8 @@ fetch('../templates/header.html')
     .then(data => {
         document.getElementById('header').innerHTML = data;
 
-        const script = document.createElement("script");
-        script.src = "../static/js/header_script.js";
+        const script = document.createElement('script');
+        script.src = '../static/js/header_script.js';
         document.body.appendChild(script);
     })
 //カレンダーの表示
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 calendar.addEvent({
                     title: title,
-                    start: info.dateStr,
+                    start: info.dateStr
                 })
 
                 modal.classList.remove("show")
@@ -144,74 +144,5 @@ document.addEventListener('DOMContentLoaded', function () {
             location.reload()
         }
     });
-    showTodaySchedule(events);
     calendar.render();
 });
-
-//今日の予定の表示
-function showTodaySchedule(events) {
-
-    const list = document.getElementById("today-schedule-list")
-
-    // 今日の日付
-    const todayObj = new Date()
-    const today = todayObj.toLocaleDateString('sv-SE')
-    const dayOfWeek = todayObj.getDay()
-
-    // 今日の予定と毎週の予定を取得
-    let todayEvents = events.filter(event =>
-        event.date === today || (event.isWeekly && event.dayOfWeek === dayOfWeek)
-    )
-
-    // 時間順に並び替え
-    todayEvents.sort((a, b) => (a.startTime || "").localeCompare(b.startTime || ""))
-
-    // 予定がない場合
-    if (todayEvents.length === 0) {
-
-        const li = document.createElement("li")
-        li.textContent = "予定なし"
-
-        list.appendChild(li)
-        return
-    }
-
-    // 予定表示
-    todayEvents.forEach(event => {
-
-        const li = document.createElement("li")
-        li.className = "task"
-
-        const colorCircle = document.createElement("span")
-        colorCircle.className = "task-color-circle"
-        colorCircle.style.background = event.color || "#4da6ff"
-        colorCircle.style.width = "12px"
-        colorCircle.style.height = "12px"
-        colorCircle.style.borderRadius = "50%"
-        colorCircle.style.display = "inline-block"
-        colorCircle.style.marginRight = "10px"
-
-        const startTime = document.createElement("span")
-        startTime.className = "task-start-time"
-        startTime.textContent = event.startTime || ""
-
-        const endTime = document.createElement("span")
-        endTime.className = "task-end-time"
-        endTime.textContent = event.endTime || ""
-
-        const name = document.createElement("span")
-        name.className = "task-name"
-        name.textContent = event.title
-
-        li.appendChild(colorCircle)
-        li.appendChild(startTime)
-        li.appendChild(document.createTextNode(" - "))
-        li.appendChild(endTime)
-        li.appendChild(document.createTextNode(" "))
-        li.appendChild(name)
-
-        list.appendChild(li)
-
-    })
-
-}

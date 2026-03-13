@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/dashboard_style.css">
+    <link rel="stylesheet" href="../static/css/calendar_style.css">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <title>ダッシュボード</title>
+    <title>カレンダー</title>
 </head>
 <!-- 予定追加ウィンドウ -->
 <div id="event-modal" class="modal">
@@ -24,7 +25,7 @@
         <label><input type="checkbox" id="event-weekly"> 毎週繰り返す</label>
 
         <label>カラー</label>
-        <select id="event-color">
+        <select id="event-color" class="event-color">
             <option value="#4da6ff">ブルー</option>
             <option value="#ff4d4d">レッド</option>
             <option value="#4dff88">グリーン</option>
@@ -39,27 +40,17 @@
 
     </div>
 </div>
+<!--カレンダー本体-->
 
 <body>
-    <!-- ヘッダーの読み込み -->
     <div id="header"></div>
     <div class="main">
-        <!--左側カレンダー-->
         <div id="calendar" class="calendar">
-        </div>
-
-        <!--右側予定一覧-->
-        <div id="today-schedule" class="today-schedule">
-            <div id="today-schedule-header" class="today-schedule-header">
-                <h2>今日の予定</h2>
-            </div>
-            <ul id="today-schedule-list" class="today-schedule-list">
-            </ul>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script src="../static/js/dashboard_script.js"></script>
+    <script src="../static/js/calendar_script.js"></script>
 </body>
 
 </html>
