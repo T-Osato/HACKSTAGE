@@ -1,10 +1,9 @@
 function to_mypage() {
-    location.href = "dashboard.html";
+    location.href = "/dashboard";
 }
 
 function logout() {
-    localStorage.removeItem("username");
-    location.href = "login.html";
+    location.href = "/logout";
 }
 
 const menuButton = document.getElementById("menu-button");

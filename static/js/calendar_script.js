@@ -10,6 +10,21 @@ fetch('../templates/header.html')
     })
 //カレンダーの表示
 document.addEventListener('DOMContentLoaded', function () {
+    // 時間入力欄を便利な選択式にする
+    flatpickr("#event-start-time", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+
+    flatpickr("#event-end-time", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+
     const calendarEl = document.getElementById('calendar')
     let events = JSON.parse(localStorage.getItem("events")) || []
     const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -34,13 +49,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     title: e.title,
                     startTime: e.startTime,
                     endTime: e.endTime,
-                    daysOfWeek: [e.dayOfWeek]
+                    daysOfWeek: [e.dayOfWeek],
+                    color: e.color
                 };
             } else {
                 return {
                     title: e.title,
                     start: e.date + "T" + e.startTime,
-                    end: e.date + "T" + e.endTime
+                    end: e.date + "T" + e.endTime,
+                    color: e.color
                 };
             }
         }),
@@ -49,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const modal = document.getElementById("event-modal")
 
-            modal.style.display = "flex"
+            modal.classList.add("show")
 
             const saveBtn = document.getElementById("save-event")
             const cancelBtn = document.getElementById("cancel-event")
@@ -58,9 +75,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const startInput = document.getElementById("event-start-time")
             const endInput = document.getElementById("event-end-time")
             const weeklyInput = document.getElementById("event-weekly")
+            const colorInput = document.getElementById("event-color")
 
             cancelBtn.onclick = function () {
-                modal.style.display = "none"
+                modal.classList.remove("show")
             }
 
             saveBtn.onclick = function () {
@@ -75,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (startTime >= endTime) return alert("終了時間は開始時間より後に設定してください")
 
                 const isWeekly = weeklyInput.checked
+                const color = colorInput.value
 
                 const newEvent = {
                     title: title,
@@ -82,7 +101,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     startTime: startTime,
                     endTime: endTime,
                     isWeekly: isWeekly,
-                    dayOfWeek: isWeekly ? new Date(info.dateStr).getDay() : null
+                    dayOfWeek: isWeekly ? new Date(info.dateStr).getDay() : null,
+                    color: color
                 }
 
                 events.push(newEvent)
@@ -94,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     start: info.dateStr
                 })
 
-                modal.style.display = "none"
+                modal.classList.remove("show")
 
                 location.reload()
 
