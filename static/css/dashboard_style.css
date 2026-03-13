@@ -113,7 +113,7 @@
     transition: 0.2s;
 }
 
-/*フォーカス */
+/* フォーカス */
 .modal-content input:focus {
     outline: none;
     border-color: #4da6ff;
