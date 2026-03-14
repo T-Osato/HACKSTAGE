@@ -5,7 +5,7 @@ from flask import Flask,render_template,request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 #Flask-Loginのインポート
-from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user
+from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user,login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 
@@ -24,6 +24,9 @@ db = SQLAlchemy(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+#未ログインの場合loginのURLへ強制転送
+login_manager.login_view = 'login'
 
 #---------------------------------------------------------------------#
 
@@ -46,6 +49,37 @@ class User(UserMixin,db.Model):
 
     #サーバー内での権限('admin','user')
     role = db.Column(db.String(20),default = 'user')
+
+# --- 既存の User クラスはそのまま ---
+
+# スレッドモデル
+class Thread(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False) # スレッドタイトル
+    content = db.Column(db.Text, nullable=False)       # 本文（長文対応で Text型）
+    tags = db.Column(db.String(100))                   # タグ（"プログラミング,教育" のような形式）
+    created_at = db.Column(db.DateTime, default=datetime.now) # 作成日時
+    
+    # 外部キー：誰がこのスレッドを立てたか (Userのidを参照)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # リレーションシップ：スレッドから作成者の情報にアクセスしやすくする
+    author = db.relationship('User', backref=db.backref('threads', lazy=True))
+
+# 返信モデル
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)       # 返信内容
+    created_at = db.Column(db.DateTime, default=datetime.now)
+    
+    # 外部キー：どのスレッドへの返信か
+    thread_id = db.Column(db.Integer, db.ForeignKey('thread.id'), nullable=False)
+    # 外部キー：誰が返信したか
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    # リレーションシップ
+    thread = db.relationship('Thread', backref=db.backref('comments', lazy=True))
+    author = db.relationship('User', backref=db.backref('comments', lazy=True))
 
 
 #---------------------------------------------------------------------#
@@ -137,7 +171,53 @@ def logout():
 def dashboard():
     #ログインしているユーザーに紐づくデータを取得
     return render_template("dashboard.html",user=current_user)
+#---------------------------------------------------------------------#
+
+@app.route("/threads", methods=['GET','POST'])
+def threads():
+    if request.method == 'POST':
+        #ログイン切れの場合ログイン画面へ
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+
+        # 1. フォームからデータを受け取る
+        title = request.form.get('title')
+        tags = request.form.get('tags')
+        content = request.form.get('content')
+
+        # 2. データベースに保存
+        new_thread = Thread(
+            title=title,
+            tags=tags,
+            content=content,
+            user_id=current_user.id # ログイン中のユーザーIDを紐付け
+        )
+        db.session.add(new_thread)
+        db.session.commit()
+        
+        # 3. 作成後は掲示板トップにリダイレクト
+        return redirect(url_for('threads'))
+
+    # GETの場合：データベースから全てのスレッドを「新しい順」に取得
+    all_threads = Thread.query.order_by(Thread.created_at.desc()).all()
+    return render_template("threads.html", threads=all_threads)
+
+@app.route('/threads/<int:thread_id>', methods=['GET','POST'])
+@login_required
+def thread_detail(thread_id):
+    #指定されたスレッドidまたは404エラー
+    thread = Thread.query.get_or_404(thread_id)
     
+    if request.method == 'POST':
+        #返信の保存処理
+        comment_content = request.form.get('content')
+        if comment_content:
+            new_comment = Comment(content = comment_content, thread_id = thread.id, user_id = current_user.id)
+            db.session.add(new_comment)
+            db.session.commit()
+        return redirect(url_for("thread_detail",thread_id = thread.id))
+    return render_template("thread_detail.html",thread=thread)
+
 with app.app_context():
     db.create_all()
 

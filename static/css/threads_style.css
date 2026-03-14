@@ -1,0 +1,149 @@
+/* threads_style.css */
+
+/* 背景などは前回の body::before を継承 (省略可) */
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #222; /* 仮の背景色 */
+    color: white;
+    display: block; /* 一覧なので上から下に並べる */
+    padding: 20px;
+}
+
+.main-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* 共通のグラスモーフィズム設定 */
+.glass-box, .thread-block {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* スレッド作成フォーム */
+.create-thread-section h3 {
+    margin-top: 0;
+}
+
+.create-thread-section input, .create-thread-section textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: none;
+    font-family: inherit;
+}
+
+.post-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* スレッド一覧のブロック */
+.thread-block {
+    cursor: pointer;
+    transition: transform 0.2s, background 0.2s;
+}
+
+.thread-block:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.thread-title {
+    margin: 10px 0;
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.tag-badge {
+    background: #3498db;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin-right: 10px;
+}
+
+.created-at {
+    font-size: 0.8rem;
+    color: #ccc;
+}
+
+.thread-footer {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #eee;
+}
+
+.author-name {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.thread-link-container {
+    text-decoration: none; /* 下線を消す */
+    color: inherit;        /* 文字色を継承する */
+    display: block;        /* ブロック要素にして全体をクリック可能にする */
+}
+
+/* --- 返信エリア全体の調整 --- */
+.reply-form {
+    margin-top: 40px;
+}
+
+.reply-form h4 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    border-left: 4px solid #4CAF50; /* アクセントの緑ライン */
+    padding-left: 10px;
+}
+
+/* --- テキストエリア（入力欄）の調整 --- */
+.reply-form textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.9); /* 少し透ける白 */
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: #333;
+    box-sizing: border-box; /* パディングを含めて100%にする */
+    resize: vertical; /* 縦方向のみリサイズ可能に */
+    min-height: 100px;
+    margin-bottom: 15px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.reply-form textarea:focus {
+    outline: 2px solid #4CAF50;
+    background: #fff;
+}
+
+/* --- 返信ボタンの調整 --- */
+.reply-form .post-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    height: 50px;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.reply-form .post-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+    filter: brightness(1.1);
+}

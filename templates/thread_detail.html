@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ thread.title }} - ICT掲示板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/threads_style.css') }}">
+</head>
+<body>
+    <div class="main-container">
+        <article class="glass-box thread-main">
+            <div class="thread-header">
+                <span class="tag-badge">{{ thread.tags }}</span>
+                <span class="created-at">{{ thread.created_at.strftime('%Y/%m/%d %H:%M') }}</span>
+            </div>
+            <h1 class="detail-title">{{ thread.title }}</h1>
+            <p class="thread-body">{{ thread.content }}</p>
+            <div class="thread-footer">
+                <span>スレ主: <strong>{{ thread.author.name }}</strong></span>
+            </div>
+        </article>
+
+        <section class="reply-form">
+            <div class="glass-box">
+                <h4>このスレッドに返信する</h4>
+                <form action="{{ url_for('thread_detail', thread_id=thread.id) }}" method="POST">
+                    <textarea name="content" placeholder="返信内容を入力してください" rows="3" required></textarea>
+                    <button type="submit" class="post-btn">返信を投稿</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="comment-section">
+            <h3 class="list-title">返信 {{ thread.comments|length }} 件</h3>
+            {% for comment in thread.comments %}
+                <div class="glass-box comment-block">
+                    <p class="comment-content">{{ comment.content }}</p>
+                    <div class="comment-footer">
+                        <span>投稿者: <strong>{{ comment.author.name }}</strong></span>
+                        <span class="comment-date">{{ comment.created_at.strftime('%m/%d %H:%M') }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        
+
+        <div class="navigation">
+            <a href="{{ url_for('threads') }}" class="back-link">← 一覧に戻る</a>
+        </div>
+    </div>
+</body>
+</html>
