@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/dashboard_style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <title>ダッシュボード</title>
 </head>
@@ -58,7 +58,7 @@
     </div>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script src="../static/js/dashboard_script.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_script.js') }}"></script>
 </body>
 
 </html>

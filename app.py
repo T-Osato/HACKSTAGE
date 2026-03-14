@@ -31,6 +31,8 @@ login_manager.login_view = 'login'
 
 #---------------------------------------------------------------------#
 
+#---------------------------------------------------------------------#
+
 #ユーザーモデルの作成
 class User(UserMixin,db.Model):
     #ID(内部管理用)
@@ -50,6 +52,7 @@ class User(UserMixin,db.Model):
 
     #サーバー内での権限('admin','user')
     role = db.Column(db.String(20),default = 'user')
+
 
 # --- 既存の User クラスはそのまま ---
 
@@ -238,13 +241,6 @@ def setting():
 def change_password():
     return render_template("change-password.html",user=current_user)
 
-@app.route("/reset", methods=['GET', 'POST'])
-def reset():
-    if request.method == 'POST':
-        # ここに将来的なパスワードリセットのロジック（メール送信など）を追加できます
-        flash("パスワードリセット用のメールを送信しました（モック）")
-        return redirect(url_for('login'))
-    return render_template("reset.html")
 
 @app.route("/change-name", methods=['GET', 'POST'])
 def change_name():
