@@ -138,6 +138,9 @@ def signup():
 #ログイン
 @app.route('/', methods=['GET','POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
     if request.method == "GET":
         return render_template("login.html")
     
@@ -210,6 +213,14 @@ def setting():
 @app.route("/change-password")
 def change_password():
     return render_template("change-password.html",user=current_user)
+
+@app.route("/reset", methods=['GET', 'POST'])
+def reset():
+    if request.method == 'POST':
+        # ここに将来的なパスワードリセットのロジック（メール送信など）を追加できます
+        flash("パスワードリセット用のメールを送信しました（モック）")
+        return redirect(url_for('login'))
+    return render_template("reset.html")
 
 @app.route("/change-name", methods=['GET', 'POST'])
 def change_name():
