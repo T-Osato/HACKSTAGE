@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="jp">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>setting</title>
-    <link rel="stylesheet" href="../static/css/destyle.css" />
     <link rel="stylesheet" href="../static/css/setting_style.css" />
 </head>
+
 <body>
+    <!-- ヘッダーの読み込み -->
+    <div id="header" data-user-name="{{ user.name }}"></div>
+
     <main class="main-content">
         <div class="setting-container">
             <h1>個人設定</h1>
@@ -16,30 +19,42 @@
                 <h2>メニュー・関連リンク</h2>
                 <ul class="link-list">
                     <li>
-                        <a href="../templates/change-password.html" class="link-item">
+                        <a href="/change-password" class="link-item">
                             <span>パスワードの変更</span>
                             <i class="arrow"></i>
                         </a>
                     </li>
                     <li>
-                        <a href="" class="link-item">
-                            <span>予定入力ページ</span>
+                        <a href="/change-name" class="link-item">
+                            <span>名前の変更</span>
+                            <i class="arrow"></i>
                         </a>
                     </li>
                     <li>
-                        <a href="https://shrike.bur.osaka-kyoiku.ac.jp/lcu-web/" target="_blank" class="link-item external">
+                        <a href="https://moodle5.osaka-kyoiku.ac.jp/2026/" class="link-item">
+                            <span>moodle</span>
+                            <i class="icon-external"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://shrike.bur.osaka-kyoiku.ac.jp/lcu-web/" target="_blank"
+                            class="link-item external">
                             <span>LiveCampas</span>
                             <i class="icon-external"></i>
                         </a>
                     </li>
+                    {% if user.role == 'admin' %}
                     <li>
                         <a href="" class="link-item admin-btn">
                             <span>管理者権限ページ</span>
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
             </section>
         </div>
     </main>
+    <script src="../static/js/header-fetch.js"></script>
 </body>
+
 </html>

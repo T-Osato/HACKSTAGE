@@ -43,13 +43,14 @@
 <!--カレンダー本体-->
 
 <body>
-    <div id="header"></div>
+    <div id="header" data-user-name="{{ user.name }}"></div>
     <div class="main">
         <div id="calendar" class="calendar">
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="../static/js/header-fetch.js"></script>
     <script src="../static/js/calendar_script.js"></script>
 </body>
 

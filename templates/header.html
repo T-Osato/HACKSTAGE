@@ -24,8 +24,26 @@
         </div>
         <div class="header-right">
             <!--ユーザーアイコン-->
-            <div class="user-icon">
-                <img src="../static/img/user_icon.png" alt="user-icon" onclick="to_setting()">
+            <div class="user-icon-container">
+                <div class="user-icon">
+                    <img src="../static/img/user_icon.png" alt="user-icon" onclick="to_setting()">
+                </div>
+                <!-- ユーザー詳細ウィンドウ -->
+                <div id="user-dropdown" class="user-dropdown">
+                    <div class="dropdown-header">
+                        <img src="../static/img/user_icon.png" alt="user-icon" class="large-icon">
+                        <div class="user-info">
+                            <p class="user-name-text"><span class="name-display"></span></p>
+                            <p class="user-role">Student</p>
+                        </div>
+                    </div>
+                    <ul class="dropdown-menu">
+                        <li><a href="/setting">個人設定</a></li>
+                        <li><a href="/change-password">パスワード変更</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#" onclick="logout(); return false;" class="logout-link">ログアウト</a></li>
+                    </ul>
+                </div>
             </div>
             <!--ログアウトボタン-->
             <button type="button" onclick="logout()" class="logout-button">logout</button>
@@ -43,7 +61,7 @@
             <li><a href="#">チャレンジ</a></li>
         </ul>
         <ul class="menu-list bottom-menu">
-            <li><a href="#">個人設定</a></li>
+            <li><a href="/setting">個人設定</a></li>
             <li><a href="#" onclick="logout(); return false;">ログアウト</a></li>
         </ul>
     </div>

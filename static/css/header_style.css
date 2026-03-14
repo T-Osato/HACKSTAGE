@@ -91,6 +91,7 @@
     height: 30px;
     border-radius: 50%;
     background-color: white;
+    cursor: pointer;
 }
 
 /*ログアウトボタン*/
@@ -187,4 +188,113 @@
     background: rgba(168, 221, 255, 0.2);
     color: #0077c2;
     padding-left: 35px;
+}
+
+/* ユーザーアイコンホバーウィンドウ */
+.user-icon-container {
+    position: relative;
+    padding: 10px 0;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 50px; /* 少し上にずらして隙間を埋める */
+    right: 0;
+    width: 240px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    
+    /* ホバー解除時にすぐ消えないように余裕を持たせる */
+    visibility: hidden;
+    opacity: 0;
+    transition: all 0.3s ease;
+    transition-delay: 0.1s; /* 0.1秒の猶予 */
+    
+    z-index: 1300;
+}
+
+/* 隙間を埋める透明なパーツ */
+.user-dropdown::before {
+    content: "";
+    position: absolute;
+    top: -20px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: transparent;
+}
+
+.user-icon-container:hover .user-dropdown {
+    visibility: visible;
+    opacity: 1;
+    top: 60px; /* スッと降りてくるアニメーション */
+    transition-delay: 0s;
+}
+
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.large-icon {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: white;
+    object-fit: cover;
+}
+
+.user-name-text {
+    font-weight: 700;
+    font-size: 16px;
+    margin: 0;
+    color: #333;
+}
+
+.user-role {
+    font-size: 12px;
+    color: #888;
+    margin: 0;
+}
+
+.dropdown-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dropdown-menu li a {
+    display: block;
+    padding: 10px 0;
+    color: #555;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.dropdown-menu li a:hover {
+    color: #0077c2;
+    transform: translateX(5px);
+}
+
+.divider {
+    height: 1px;
+    background: rgba(0, 0, 0, 0.05);
+    margin: 10px 0;
+}
+
+.logout-link {
+    color: #ff4d4d !important;
+}
+
+@keyframes dropdownFade {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

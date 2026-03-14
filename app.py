@@ -141,6 +141,32 @@ def index():
 def dashboard():
     #ログインしているユーザーに紐づくデータを取得
     return render_template("dashboard.html",user=current_user)
+
+@app.route("/calendar")
+def calendar():
+    return render_template("calendar.html",user=current_user)
+
+@app.route("/setting")
+def setting():
+    return render_template("setting.html",user=current_user)
+
+@app.route("/change-password")
+def change_password():
+    return render_template("change-password.html",user=current_user)
+
+@app.route("/change-name", methods=['GET', 'POST'])
+def change_name():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        new_name = request.form.get('new_name')
+        if new_name:
+            current_user.name = new_name
+            db.session.commit()
+            return redirect(url_for('setting'))
+            
+    return render_template("change-name.html", user=current_user)
     
 with app.app_context():
     db.create_all()

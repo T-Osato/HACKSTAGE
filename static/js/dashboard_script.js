@@ -1,13 +1,3 @@
-//ヘッダーの読み込み
-fetch('../templates/header.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('header').innerHTML = data;
-
-        const script = document.createElement("script");
-        script.src = "../static/js/header_script.js";
-        document.body.appendChild(script);
-    })
 //カレンダーの表示
 document.addEventListener('DOMContentLoaded', function () {
     // 時間入力欄を便利な選択式にする
