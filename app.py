@@ -172,12 +172,14 @@ def logout():
 
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     #ログインしているユーザーに紐づくデータを取得
     return render_template("dashboard.html",user=current_user)
 #---------------------------------------------------------------------#
 
 @app.route("/threads", methods=['GET','POST'])
+@login_required
 def threads():
     if request.method == 'POST':
         #ログイン切れの場合ログイン画面へ
@@ -203,14 +205,17 @@ def threads():
         return redirect(url_for('threads'))
 
 @app.route("/calendar")
+@login_required
 def calendar():
     return render_template("calendar.html",user=current_user)
 
 @app.route("/setting")
+@login_required
 def setting():
     return render_template("setting.html",user=current_user)
 
 @app.route("/change-password")
+@login_required
 def change_password():
     return render_template("change-password.html",user=current_user)
 
