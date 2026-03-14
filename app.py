@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from flask import Flask,render_template,request, redirect, url_for, flash, abort
 
@@ -50,6 +51,22 @@ class User(UserMixin,db.Model):
 
     #サーバー内での権限('admin','user')
     role = db.Column(db.String(20),default = 'user')
+
+#学年暦モデル
+class AcademicCalendar(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_date = db.Column(db.Date, nullable=False)
+    reason = db.Column(db.String(100))
+    category = db.Column(db.String(20), default='holiday') 
+    makeup_day = db.Column(db.String(20)) 
+    tag_info = db.Column(db.String(50))
+
+# コース予定モデル
+class CourseEvent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    event_date = db.Column(db.Date, nullable=False) # 日付
+    event_time = db.Column(db.String(50))           # 時間（"13:00" や "未定" など自由入力）
+    detail = db.Column(db.Text, nullable=False)      # 予定の詳細内容
 
 # --- 既存の User クラスはそのまま ---
 
@@ -170,12 +187,55 @@ def logout():
 
 #---------------------------------------------------------------------#
 
-
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    #ログインしているユーザーに紐づくデータを取得
-    return render_template("dashboard.html",user=current_user)
+    # 1. 管理者が入力したデータを取得
+    academic_data = AcademicCalendar.query.all()
+    course_data = CourseEvent.query.all()
+
+    # 2. FullCalendarが理解できる形式（リスト）に変換
+    calendar_events = []
+
+    # --- 学年暦（休日・振替授業）の処理 ---
+    for event in academic_data:
+        if event.category == 'makeup':
+            # ★振替授業の場合：曜日情報をタイトルに組み込む
+            prefix = "【振替】"
+            # 曜日が選択されていれば「〇曜日の授業」、なければ既存の情報を表示
+            day_label = f"{event.makeup_day}の授業" if event.makeup_day else (event.tag_info or event.reason or "授業")
+            display_title = f"{prefix}{day_label}"
+            event_color = "#ed8936"  # 振替はオレンジ色
+        else:
+            # 休日の場合
+            prefix = ""
+            title_content = event.tag_info if event.tag_info else event.reason
+            display_title = f"{prefix}{title_content if title_content else '休日'}"
+            event_color = "#ff4d4d"  # 休日は赤色
+        
+        calendar_events.append({
+            "title": display_title,
+            "start": event.event_date.isoformat(),
+            "color": event_color,
+            "allDay": True
+        })
+
+    # --- コース予定（講義連絡など）の処理 ---
+    for event in course_data:
+        calendar_events.append({
+            "title": f"【コース】{event.detail}",
+            "start": event.event_date.isoformat(),
+            "description": event.event_time, 
+            "color": "#3182ce"  # コースカラーの青
+        })
+
+    # 3. HTMLにデータを渡す
+    return render_template(
+        "dashboard.html", 
+        user=current_user, 
+        events_json=json.dumps(calendar_events)
+    )
+
 #---------------------------------------------------------------------#
 
 @app.route("/threads", methods=['GET','POST'])
@@ -223,20 +283,28 @@ def threads():
     all_threads = query.order_by(Thread.created_at.desc()).all()
     return render_template("threads.html", threads=all_threads, search_query=search_query)
 
+#---------------------------------------------------------------------#
+
 @app.route("/calendar")
 @login_required
 def calendar():
     return render_template("calendar.html",user=current_user)
+
+#---------------------------------------------------------------------#
 
 @app.route("/setting")
 @login_required
 def setting():
     return render_template("setting.html",user=current_user)
 
+#---------------------------------------------------------------------#
+
 @app.route("/change-password")
 @login_required
 def change_password():
     return render_template("change-password.html",user=current_user)
+
+#---------------------------------------------------------------------#
 
 @app.route("/reset", methods=['GET', 'POST'])
 def reset():
@@ -245,6 +313,8 @@ def reset():
         flash("パスワードリセット用のメールを送信しました（モック）")
         return redirect(url_for('login'))
     return render_template("reset.html")
+
+#---------------------------------------------------------------------#
 
 @app.route("/change-name", methods=['GET', 'POST'])
 def change_name():
@@ -259,6 +329,8 @@ def change_name():
             return redirect(url_for('setting'))
             
     return render_template("change-name.html", user=current_user)
+
+#---------------------------------------------------------------------#
 
 @app.route("/delete-account", methods=["POST"])
 @login_required
@@ -287,7 +359,7 @@ def delete_account():
     flash(f"アカウント [{user_name}] を削除しました。ご利用ありがとうございました。")
     return redirect(url_for("login"))
     
-    
+#---------------------------------------------------------------------#
 
 @app.route('/threads/<int:thread_id>', methods=['GET','POST'])
 @login_required
@@ -304,6 +376,8 @@ def thread_detail(thread_id):
             db.session.commit()
         return redirect(url_for("thread_detail",thread_id = thread.id))
     return render_template("thread_detail.html",thread=thread)
+
+#---------------------------------------------------------------------#
 
 @app.route('/threads/<int:thread_id>/delete',methods=['POST'])
 @login_required
@@ -324,14 +398,28 @@ def delete_thread(thread_id):
     #削除後は一覧ページへ戻る
     return redirect(url_for('threads'))
 
+#---------------------------------------------------------------------#
+
+# --- admin_users関数も、リストを表示するためにデータを取得するように修正 ---
 @app.route("/admin/users")
 @login_required
 def admin_users():
-    # 管理者権限チェック
     if current_user.role != 'admin':
         abort(403)
-    users = User.query.all()
-    return render_template("admin_users.html", users=users)
+    
+    all_users = User.query.all()
+    # 追加：登録済みの予定も取得して渡す
+    academic_list = AcademicCalendar.query.order_by(AcademicCalendar.event_date.desc()).all()
+    course_list = CourseEvent.query.order_by(CourseEvent.event_date.desc()).all()
+    
+    return render_template(
+        "admin_users.html", 
+        users=all_users, 
+        academic_list=academic_list, 
+        course_list=course_list
+    )
+
+#---------------------------------------------------------------------#
 
 @app.route("/admin/users/<int:target_user_id>/delete", methods=["POST"])
 @login_required
@@ -364,6 +452,8 @@ def delete_user(target_user_id):
     flash(f"ユーザー [{target_user.name}] を削除しました。")
     return redirect(url_for("admin_users"))
 
+#---------------------------------------------------------------------#
+
 @app.route("/admin/users/<int:target_user_id>/toggle-role", methods=["POST"])
 @login_required
 def toggle_user_role(target_user_id):
@@ -387,6 +477,101 @@ def toggle_user_role(target_user_id):
     db.session.commit()
     flash(f"ユーザー [{target_user.name}] の権限を [{target_user.role}] に変更しました。")
     return redirect(url_for("admin_users"))
+
+#---------------------------------------------------------------------#
+
+# 1. 学年暦の登録（休日や振替授業など）
+@app.route('/admin/add_academic_calendar', methods=['POST'])
+@login_required
+def add_academic_calendar():
+    if current_user.role != 'admin':
+        abort(403)
+    
+    # フォームからデータ取得
+    date_str = request.form.get('date')
+    category = request.form.get('category')   # 'holiday' か 'makeup'
+    makeup_day = request.form.get('makeup_day') # ★追加：振替対象の曜日
+    tag_info = request.form.get('tag_info')   # 備考
+    reason   = request.form.get('reason')     # 予備
+
+    if date_str:
+        try:
+            # 日付文字列をPythonの日付型に変換
+            new_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            
+            new_event = AcademicCalendar(
+                event_date=new_date, 
+                category=category,
+                makeup_day=makeup_day, # ★追加：DBに保存
+                tag_info=tag_info,
+                reason=reason
+            )
+            db.session.add(new_event)
+            db.session.commit()
+            flash("学年暦を登録しました")
+        except ValueError:
+            flash("日付の形式が正しくありません")
+    
+    return redirect(url_for('admin_users'))
+
+
+# 2. コース予定の登録（講義連絡やイベントなど）
+@app.route('/admin/add_course_event', methods=['POST'])
+@login_required
+def add_course_event():
+    if current_user.role != 'admin':
+        abort(403)
+    
+    # フォームからデータ取得
+    date_str = request.form.get('event_date')
+    time_str = request.form.get('event_time')
+    detail   = request.form.get('event_detail')
+
+    if date_str and detail:
+        try:
+            # 日付文字列をPythonの日付型に変換
+            new_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            
+            new_course_event = CourseEvent(
+                event_date=new_date,
+                event_time=time_str,
+                detail=detail
+            )
+            db.session.add(new_course_event)
+            db.session.commit()
+            flash("コース予定を登録・配信しました")
+        except ValueError:
+            flash("日付の形式が正しくありません")
+    
+    return redirect(url_for('admin_users'))
+
+# 学年暦の削除
+@app.route('/admin/delete_academic/<int:event_id>', methods=['POST'])
+@login_required
+def delete_academic(event_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    event = AcademicCalendar.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    flash("学年暦を削除しました")
+    return redirect(url_for('admin_users'))
+
+# コース予定の削除
+@app.route('/admin/delete_course_event/<int:event_id>', methods=['POST'])
+@login_required
+def delete_course_event(event_id):
+    if current_user.role != 'admin':
+        abort(403)
+    
+    event = CourseEvent.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    flash("コース予定を削除しました")
+    return redirect(url_for('admin_users'))
+
+#---------------------------------------------------------------------#
 
 with app.app_context():
     db.create_all()
