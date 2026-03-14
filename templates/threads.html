@@ -13,6 +13,24 @@
             <p class="user-info">Login as: <strong>{{ current_user.name }}</strong></p>
         </header>
 
+        <section class="search-section" style="margin: 20px 0;">
+            <div class="glass-box">
+                <form action="{{ url_for('threads') }}" method="GET" style="display: flex; gap: 10px;">
+                    <input type="text" name="search" placeholder="キーワードで検索..." 
+                        value="{{ search_query }}" 
+                        style="flex: 1; padding: 10px; border-radius: 5px; border: none;">
+                    <button type="submit" class="post-btn" style="width: auto; padding: 0 20px;">検索</button>
+                    
+                    {% if search_query %}
+                        <a href="{{ url_for('threads') }}" 
+                        style="color: white; text-decoration: none; align-self: center; font-size: 0.8rem;">
+                        ✖ 解除
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+        </section>
+
         <section class="create-thread-section">
             <div class="glass-box">
                 <h3>新しいスレッドを立てる</h3>

@@ -19,6 +19,20 @@
             </div>
         </article>
 
+        <div class="thread-footer">
+            <span>スレ主: <strong>{{ thread.author.name }}</strong> ({{ thread.author.student_id }})</span>
+
+            {% if thread.user_id == current_user.id %}
+            <div class="admin-actions">
+                <form action="{{ url_for('delete_thread', thread_id=thread.id) }}" method="POST" style="display: inline;">
+                    <button type="submit" class="delete-btn" onclick="return confirm('このスレッドと全ての返信が削除されます。本当によろしいですか？')">
+                        🗑️ スレッドを削除
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
         <section class="reply-form">
             <div class="glass-box">
                 <h4>このスレッドに返信する</h4>

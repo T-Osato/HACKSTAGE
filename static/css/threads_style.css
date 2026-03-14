@@ -147,3 +147,26 @@ body {
     box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
     filter: brightness(1.1);
 }
+
+/* static/css/threads_style.css に追加 */
+
+.admin-actions {
+    margin-top: 15px;
+}
+
+.delete-btn {
+    background: rgba(255, 68, 68, 0.2); /* 透明感のある赤 */
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    padding: 5px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: 0.3s;
+}
+
+.delete-btn:hover {
+    background: #ff4444;
+    color: white;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}

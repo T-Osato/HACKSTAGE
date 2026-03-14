@@ -1,8 +1,9 @@
 from datetime import datetime
-from flask import Flask,render_template,request, redirect, url_for, flash
+from flask import Flask,render_template,request, redirect, url_for, flash, abort
 
 #SQLAlchemyをインポート
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy 
+from sqlalchemy import or_
 
 #Flask-Loginのインポート
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user,login_required
@@ -197,10 +198,25 @@ def threads():
         
         # 3. 作成後は掲示板トップにリダイレクト
         return redirect(url_for('threads'))
+    
+    #検索処理
+    search_query = request.args.get('search','')
+
+    #クエリの基本形（全件取得の準備）
+    query = Thread.query
+
+    if search_query:
+        #フィルターをかける
+        query = query.filter(
+            or_(
+                Thread.title.contains(search_query),
+                Thread.tags.contains(search_query)
+            )
+        )
 
     # GETの場合：データベースから全てのスレッドを「新しい順」に取得
-    all_threads = Thread.query.order_by(Thread.created_at.desc()).all()
-    return render_template("threads.html", threads=all_threads)
+    all_threads = query.order_by(Thread.created_at.desc()).all()
+    return render_template("threads.html", threads=all_threads, search_query=search_query)
 
 @app.route('/threads/<int:thread_id>', methods=['GET','POST'])
 @login_required
@@ -217,6 +233,25 @@ def thread_detail(thread_id):
             db.session.commit()
         return redirect(url_for("thread_detail",thread_id = thread.id))
     return render_template("thread_detail.html",thread=thread)
+
+@app.route('/threads/<int:thread_id>/delete',methods=['POST'])
+@login_required
+def delete_thread(thread_id):
+    thread = Thread.query.get_or_404(thread_id)
+
+    #権限チェック：作成者本人か確認
+    if thread.user_id != current_user.id:
+        abort(403)
+    
+    #関連するコメントを先に削除
+    for comment in thread.comments:
+        db.session.delete(comment)
+    
+    db.session.delete(thread)
+    db.session.commit()
+
+    #削除後は一覧ページへ戻る
+    return redirect(url_for('threads'))
 
 with app.app_context():
     db.create_all()
