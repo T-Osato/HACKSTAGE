@@ -14,6 +14,7 @@ body {
 .main-container {
     max-width: 800px;
     margin: 0 auto;
+    padding-top: 95px; /* 75px header + 20px margin */
 }
 
 /* 共通のグラスモーフィズム設定 */
