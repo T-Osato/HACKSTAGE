@@ -418,11 +418,27 @@ def save_log():
     return redirect(url_for('show_list'))
 
 @app.route('/list')
-@login_required
 def show_list():
-    # 自分のIDのものだけを絞り込む
-    user_logs = MemoryLog.query.filter_by(user_id=current_user.id).all()
-    return render_template('record-list.html', logs=user_logs)
+    # 両方のフィルター値を取得
+    category_filter = request.args.get('category_filter')
+    status_filter = request.args.get('status_filter')
+
+    # まずは全件取得のクエリ（命令）を準備
+    query = MemoryLog.query
+
+    # カテゴリーが選ばれていたら条件を追加
+    if category_filter:
+        query = query.filter_by(category=category_filter)
+    
+    # ステータスが選ばれていたらさらに条件を追加
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+
+    # 最後にデータを取得（新しい順にするなら .order_by(MemoryLog.id.desc()) を足すと良いです）
+    logs = query.all()
+    
+    return render_template('record-list.html', logs=logs)
+    
 @app.route('/delete-log/<int:id>')
 @login_required
 def delete_log(id):

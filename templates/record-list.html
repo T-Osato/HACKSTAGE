@@ -17,6 +17,22 @@
     <main>
         <nav class="filter-nav">
             <form action="{{ url_for('show_list') }}" method="GET" class="filter-form">
+                <select name="category_filter" id="category_filter">
+                    <option value="">すべて</option>
+                    <option value="place">場所</option>
+                    <option value="food">食べ物</option>
+                    <option value="book">本</option>
+                    <option value="movie">映画</option>
+                    <option value="other">その他</option>
+                </select>
+
+                <select name="status_filter" id="status_filter">
+                    <option value="">すべて</option>
+                    <option value="wish">⭐ Wish</option>
+                    <option value="done">✅ Done</option>
+                </select>
+                <button type="submit" class="filter-btn">絞り込む</button>
+            <a href="{{ url_for('show_list') }}" class="reset-link">解除</a>
             </form>
         </nav>
 
@@ -25,7 +41,15 @@
             <article class="log-card">
                 <div class="card-header">
                     <span class="log-date">{{ log.date }}</span>
-                    <span class="badge status-{{ log.status | lower }}">{{ log.status }}</span>
+                    <span class="badge status-{{ log.status | lower }}">
+                        {% if log.status == 'wish' %}
+                            ⭐Wish
+                        {% elif log.status == 'done' %}
+                            ✅Done
+                        {% else %}
+                            {{ log.status }}
+                        {% endif %}
+                    </span>
                 </div>
                 <div class="card-body">
                     <h2 class="log-title">{{ log.title }}</h2>

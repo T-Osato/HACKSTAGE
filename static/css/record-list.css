@@ -104,3 +104,71 @@ h1 {
     margin-top: 15px;
     text-align: right;
 }
+
+/* 検索バー全体の囲み */
+.filter-nav {
+    margin: 20px auto;
+    max-width: 900px; /* カードの幅に合わせる */
+    padding: 0 10px;
+}
+
+/* フォームの中身を横並びにして整列 */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap; /* 画面が狭いときは自動で折り返す */
+    gap: 10px;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* ほんのり影をつけて浮かせる */
+    align-items: center;
+}
+
+/* セレクトボックス（カテゴリー・ステータス共通） */
+.filter-form select {
+    flex: 1; /* 横幅を均等に広げる */
+    min-width: 150px; /* 狭くなりすぎないように */
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    font-size: 14px;
+    color: #4a5568;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.filter-form select:focus {
+    border-color: #4da6ff;
+}
+
+/* 絞り込むボタン */
+.filter-btn {
+    background: #4da6ff;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap; /* ボタン内の文字を改行させない */
+}
+
+.filter-btn:hover {
+    background: #1c8cff;
+}
+
+/* 解除リンク */
+.reset-link {
+    color: #a0aec0;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 5px;
+    white-space: nowrap;
+}
+
+.reset-link:hover {
+    text-decoration: underline;
+}
