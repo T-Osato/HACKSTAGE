@@ -198,6 +198,25 @@ def threads():
         
         # 3. 作成後は掲示板トップにリダイレクト
         return redirect(url_for('threads'))
+    
+    #検索処理
+    search_query = request.args.get('search','')
+
+    #クエリの基本形（全件取得の準備）
+    query = Thread.query
+
+    if search_query:
+        #フィルターをかける
+        query = query.filter(
+            or_(
+                Thread.title.contains(search_query),
+                Thread.tags.contains(search_query)
+            )
+        )
+
+    # GETの場合：データベースから全てのスレッドを「新しい順」に取得
+    all_threads = query.order_by(Thread.created_at.desc()).all()
+    return render_template("threads.html", threads=all_threads, search_query=search_query)
 
 @app.route("/calendar")
 def calendar():
@@ -225,24 +244,7 @@ def change_name():
             
     return render_template("change-name.html", user=current_user)
     
-    #検索処理
-    search_query = request.args.get('search','')
-
-    #クエリの基本形（全件取得の準備）
-    query = Thread.query
-
-    if search_query:
-        #フィルターをかける
-        query = query.filter(
-            or_(
-                Thread.title.contains(search_query),
-                Thread.tags.contains(search_query)
-            )
-        )
-
-    # GETの場合：データベースから全てのスレッドを「新しい順」に取得
-    all_threads = query.order_by(Thread.created_at.desc()).all()
-    return render_template("threads.html", threads=all_threads, search_query=search_query)
+    
 
 @app.route('/threads/<int:thread_id>', methods=['GET','POST'])
 @login_required
