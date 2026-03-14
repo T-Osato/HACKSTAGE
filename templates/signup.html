@@ -1,34 +1,55 @@
 <!DOCTYPE html>
-
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新規登録</title>
-    <link rel="stylesheet" href="../static/css/signup_style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup_style.css') }}">
 </head>
-
 <body>
     <div class="signup-container">
         <div class="signup-box">
             <h2>新規登録</h2>
-            <form action="" method="post"> <!-- ここにサーバーのリンク先を代入してほしい -->
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-container"> {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('signup') }}" method="post" onsubmit="return checkPassword();">
                 <div class="input-box">
-                    <input type="text" name="student_id" placeholder="学籍番号">
+                    <input type="text" name="student_id" placeholder="学籍番号" required>
                 </div>
-                <form onsubmit="return checkPassword();">
-                    <div class="input-box">
-                        <input type="password" id="pass1" placeholder="パスワード">
-                    </div>
-                    <div class="input-box">
-                        <input type="password" id="pass2" placeholder="パスワード再入力">
-                    </div>
-                    <button type="submit">登録</button>
-                </form>
+                <div class="input-box">
+                    <input type="text" name="name" placeholder="氏名" required>
+                </div>
+                <div class="input-box">
+                    <input type="password" name="password" id="pass1" placeholder="パスワード" required>
+                </div>
+                <div class="input-box">
+                    <input type="password" id="pass2" placeholder="パスワード再入力" required>
+                </div>
+                
+                <button type="submit">登録</button>
                 <br>
-                <a href="login.html">ログインはこちら</a>
+                <a href="{{ url_for('login') }}">ログインはこちら</a>
             </form>
         </div>
     </div>
-</body>
 
+    <script>
+        function checkPassword() {
+            const p1 = document.getElementById("pass1").value;
+            const p2 = document.getElementById("pass2").value;
+            if (p1 !== p2) {
+                alert("パスワードが一致しません");
+                return false; // 送信をキャンセル
+            }
+            return true;
+        }
+    </script>
+</body>
 </html>

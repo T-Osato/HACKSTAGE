@@ -1,63 +1,157 @@
-body {
+/* --- 基本レイアウト --- */
+html, body {
+    height: 100%;
+    width: 100%;
     margin: 0;
-    min-height: 100vh;
+}
+
+body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: sans-serif;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background-color: #333; /* 画像が読み込まれるまでの待機色 */
+    overflow: hidden;
 }
 
-/* 背景画像 */
+/* --- 背景画像 (ぼかし・端の対策済み) --- */
 body::before {
     content: "";
     position: fixed;
-    inset: 0;
-
-    background: url("../img/login_background.png");
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* パスを確実に通すための絶対パス指定 */
+    background: url("/static/img/login_background.png") no-repeat center center;
     background-size: cover;
-    background-position: center;
-
+    
+    /* ぼかし効果 */
     filter: blur(8px);
+    /* ぼかした時の端の白い線を消すために少し大きくする */
     transform: scale(1.1);
-    /* ぼかしの端対策 */
-
+    
+    /* 最背面に配置 */
     z-index: -1;
 }
 
-/* ログインフォーム */
+/* --- 新規登録ボックス (グラスモーフィズム) --- */
 .signup-box {
     width: 90%;
     max-width: 350px;
-
     padding: 40px;
     text-align: center;
 
+    /* 半透明の背景とぼかし */
     background: rgba(255, 255, 255, 0.15);
     backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Safari対策 */
 
     border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     color: white;
 }
 
-/* 入力欄 */
+/* タイトルを「登録」ボタンの質感に合わせる */
+.signup-box h2 {
+    /* 1. フォントの種類をボタンと同じにする */
+    font-family: inherit; 
+    
+    /* 2. 太さをボタン（Bold）に合わせる */
+    font-weight: bold;
+    
+    /* 3. ボタンと同じ文字間隔にする（画像だと少しパキッとしていたので） */
+    letter-spacing: 0.05em;
+
+    /* 4. タイトルなのでサイズはボタンより少し大きく */
+    font-size: 24px;
+    
+    /* 余白の調整 */
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* --- フラッシュメッセージ (通知) --- */
+.flash-container {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.flash-message {
+    padding: 10px;
+    background-color: rgba(217, 83, 79, 0.8); /* 警告の赤(半透明) */
+    color: white;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    border: 1px solid #d9534f;
+    
+    /* フェードインアニメーション */
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- 入力エリア --- */
+.input-box {
+    margin-bottom: 15px;
+}
+
 .signup-box input {
     width: 100%;
     padding: 12px;
-    margin: 10px 0;
-
+    box-sizing: border-box; /* paddingで幅が広がらないように */
     border: none;
     border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    outline: none;
 }
 
-/* ボタン */
+.signup-box input:focus {
+    background: #fff;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* --- ボタン --- */
 .signup-box button {
     width: 100%;
     padding: 12px;
     margin-top: 10px;
-
     border: none;
     border-radius: 8px;
     background: #4CAF50;
     color: white;
     font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.1s;
+}
+
+.signup-box button:hover {
+    background: #45a049;
+}
+
+.signup-box button:active {
+    transform: scale(0.98);
+}
+
+/* --- リンク --- */
+.signup-box a {
+    display: inline-block;
+    margin-top: 20px;
+    color: #e0e0e0;
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.signup-box a:hover {
+    color: #ffffff;
+    text-decoration: underline;
 }

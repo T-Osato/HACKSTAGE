@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ログイン</title>
-    <link rel="stylesheet" href="../static/css/login_style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login_style.css') }}">
 </head>
 
 <body>
     <div class="login-container">
         <div class="login-box">
             <h2>ICT教育コース掲示板</h2>
-            <form action="" method="post"> <!-- ここにサーバーのリンク先を代入してほしい -->
+            <form action="{{url_for('login')}}" method="post"> <!-- ここにサーバーのリンク先を代入してほしい -->
                 <div class="input-box">
                     <input type="text" name="student_id" placeholder="学籍番号">
                 </div>
@@ -22,7 +22,7 @@
                 <br>
                 <a href="reset.html">パスワードを忘れた場合はこちら</a>
                 <br>
-                <a href="signup.html">新規登録はこちら</a>
+                <a href="{{url_for('signup')}}">新規登録はこちら</a>
             </form>
         </div>
     </div>

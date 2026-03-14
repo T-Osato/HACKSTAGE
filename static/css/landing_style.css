@@ -1,0 +1,52 @@
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: sans-serif;
+}
+
+/* 背景画像 */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+
+    background: url("../img/login_background.png");
+    background-size: cover;
+    background-position: center;
+
+    filter: blur(8px);
+    transform: scale(1.1);
+    /* ぼかしの端対策 */
+
+    z-index: -1;
+}
+
+.landing-box {
+    width: 90%;
+    max-width: 400px;
+
+    padding: 40px;
+    text-align: center;
+
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+
+    border-radius: 15px;
+    color: white;
+}
+
+/* ボタン */
+.button button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+
+    border: none;
+    border-radius: 8px;
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+}

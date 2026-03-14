@@ -1,19 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>ICT教育コースホームページ</title>
+    <link rel="stylesheet" href="../static/css/landing_style.css">
 </head>
+
 <body>
-    <h1>マイページ</h1>
-
-    <form action="{{url_for('login')}}">
-        <input type="submit" value="ログイン">
-    </form>
-
-    <form action="{{url_for('signup')}}">
-        <input type="submit" value="サインアップ">
-    </form>
+    <div class="landing-box">
+        <h1>ICT教育コースマイページ</h1>
+        <div class="button">
+            <form action="{{url_for('login')}}">
+                <button type="submit">ログイン</button>
+            </form>
+        </div>
+        <div class="button">
+            <form action="{{url_for('signup')}}">
+                <button type="submit">新規登録</button>
+            </form>
+        </div>
+    </div>
 </body>
+
 </html>
