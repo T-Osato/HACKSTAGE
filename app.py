@@ -138,6 +138,9 @@ def signup():
 #ログイン
 @app.route('/', methods=['GET','POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+        
     if request.method == "GET":
         return render_template("login.html")
     
@@ -169,12 +172,14 @@ def logout():
 
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     #ログインしているユーザーに紐づくデータを取得
     return render_template("dashboard.html",user=current_user)
 #---------------------------------------------------------------------#
 
 @app.route("/threads", methods=['GET','POST'])
+@login_required
 def threads():
     if request.method == 'POST':
         #ログイン切れの場合ログイン画面へ
@@ -219,16 +224,27 @@ def threads():
     return render_template("threads.html", threads=all_threads, search_query=search_query)
 
 @app.route("/calendar")
+@login_required
 def calendar():
     return render_template("calendar.html",user=current_user)
 
 @app.route("/setting")
+@login_required
 def setting():
     return render_template("setting.html",user=current_user)
 
 @app.route("/change-password")
+@login_required
 def change_password():
     return render_template("change-password.html",user=current_user)
+
+@app.route("/reset", methods=['GET', 'POST'])
+def reset():
+    if request.method == 'POST':
+        # ここに将来的なパスワードリセットのロジック（メール送信など）を追加できます
+        flash("パスワードリセット用のメールを送信しました（モック）")
+        return redirect(url_for('login'))
+    return render_template("reset.html")
 
 @app.route("/change-name", methods=['GET', 'POST'])
 def change_name():
