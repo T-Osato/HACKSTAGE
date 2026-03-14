@@ -1,6 +1,6 @@
 import json
 from datetime import datetime
-from flask import Flask,render_template,request, redirect, url_for, flash, abort
+from flask import Flask,render_template,request, redirect, url_for, flash, abort,jsonify
 
 #SQLAlchemyをインポート
 from flask_sqlalchemy import SQLAlchemy 
@@ -100,6 +100,30 @@ class Comment(db.Model):
     author = db.relationship('User', backref=db.backref('comments', lazy=True))
 
 
+class UserCourse(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    year = db.Column(db.Integer, nullable=False)        # ★ 2026 など
+    semester = db.Column(db.String(10), nullable=False)   # 'Spring' or 'Fall'
+    day_of_week = db.Column(db.String(10), nullable=False) # 'mon', 'tue'...
+    period = db.Column(db.Integer, nullable=False)      # 1〜5
+    term = db.Column(db.String(5), nullable=False)       # 'T1', 'T2', 'T3', 'T4'
+    course_name = db.Column(db.String(100))
+
+class TermPeriod(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # ユーザーごとに設定
+    year = db.Column(db.Integer, nullable=False)        # 2026
+    term_name = db.Column(db.String(10), nullable=False) # 'T1', 'T2', 'T3', 'T4'
+    start_date = db.Column(db.Date, nullable=False)      # 開始日
+    end_date = db.Column(db.Date, nullable=False)        # 終了日
+
+class PeriodTime(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    period = db.Column(db.Integer, nullable=False)  # 1, 2, 3, 4, 5
+    start_time = db.Column(db.String(5))            # "09:00"
+    end_time = db.Column(db.String(5))              # "10:30"
 #---------------------------------------------------------------------#
 
 #ユーザーを読み込むためのコールバック
@@ -571,6 +595,119 @@ def delete_course_event(event_id):
     flash("コース予定を削除しました")
     return redirect(url_for('admin_users'))
 
+# --- 個人設定ページ ---
+@app.route("/settings")
+@login_required
+def settings():
+    return render_template("setting.html", user=current_user)
+
+# --- 授業（時間割）登録ページ ---
+@app.route("/settings/courses", methods=['GET', 'POST'])
+@login_required
+def course_settings():
+    if request.method == 'POST':
+        # ★デバッグ用：ブラウザからどんなデータが送られてきたかVSCodeのターミナルに表示します
+        print("【確認】受信したデータ:", request.form)
+
+        year = request.form.get('year', type=int)
+        semester = request.form.get('semester')
+        
+        # Springなら前ターム=T1/後ターム=T2、FallならT3/T4
+        t_first = 'T1' if semester == 'Spring' else 'T3'
+        t_second = 'T2' if semester == 'Spring' else 'T4'
+
+        # --- 1. 古いデータを一旦リセット（上書きのため） ---
+        UserCourse.query.filter_by(user_id=current_user.id, year=year, semester=semester).delete()
+        TermPeriod.query.filter_by(user_id=current_user.id, year=year).delete()
+        PeriodTime.query.filter_by(user_id=current_user.id).delete()
+
+        # --- 2. 授業（時間割）の保存 ---
+        days = ['mon', 'tue', 'wed', 'thu', 'fri']
+        for p in range(1, 6):
+            for d in days:
+                name1 = request.form.get(f"{d}_{p}_t1")
+                name2 = request.form.get(f"{d}_{p}_t2")
+                
+                if name1 and name1.strip() != "":
+                    db.session.add(UserCourse(user_id=current_user.id, year=year, semester=semester, day_of_week=d, period=p, term=t_first, course_name=name1))
+                if name2 and name2.strip() != "":
+                    db.session.add(UserCourse(user_id=current_user.id, year=year, semester=semester, day_of_week=d, period=p, term=t_second, course_name=name2))
+
+        # --- 3. ターム日程の保存 ---
+        for t in ['T1', 'T2', 'T3', 'T4']:
+            start_str = request.form.get(f"{t}_start")
+            end_str = request.form.get(f"{t}_end")
+            if start_str and end_str:
+                start_date = datetime.strptime(start_str, '%Y-%m-%d').date()
+                end_date = datetime.strptime(end_str, '%Y-%m-%d').date()
+                db.session.add(TermPeriod(user_id=current_user.id, year=year, term_name=t, start_date=start_date, end_date=end_date))
+
+        # --- 4. 時限の標準時間の保存 ---
+        for p in range(1, 6):
+            s_time = request.form.get(f"p{p}_start")
+            e_time = request.form.get(f"p{p}_end")
+            if s_time and e_time:
+                db.session.add(PeriodTime(user_id=current_user.id, period=p, start_time=s_time, end_time=e_time))
+
+        # --- 5. データベースに確定（コミット）★ここをエラー捕獲機能に変更！ ---
+        try:
+            db.session.commit()
+            print("✅ データベースへの保存が【大成功】しました！")
+            flash("時間割と設定を保存しました！")
+        except Exception as e:
+            db.session.rollback()  # エラーが起きたらキャンセル
+            print("❌ 【大問題発生】データベース保存エラー:", e)
+            flash("保存中にエラーが発生しました（詳細はターミナルを確認）")
+        
+        return redirect(url_for('course_settings'))
+
+    return render_template("course_settings.html", user=current_user)
+
+#データ取得（授業科目登録ページ）
+@app.route("/api/get_timetable")
+@login_required
+def get_timetable():
+    year = request.args.get('year', type=int)
+    semester = request.args.get('semester')
+
+    courses = UserCourse.query.filter_by(user_id=current_user.id, year=year, semester=semester).all()
+    periods = TermPeriod.query.filter_by(user_id=current_user.id, year=year).all()
+
+    # --- 追加：時限設定の取得 ---
+    pt_data = PeriodTime.query.filter_by(user_id=current_user.id).all()
+    period_times = {pt.period: {'start': pt.start_time, 'end': pt.end_time} for pt in pt_data}
+    # --- ここまで ---
+
+    return jsonify({
+        'courses': [{'day': c.day_of_week, 'period': c.period, 'term': c.term, 'name': c.course_name} for c in courses],
+        'periods': {p.term_name: {'start': p.start_date.isoformat(), 'end': p.end_date.isoformat()} for p in periods},
+        'period_times': period_times  # これをレスポンスに加える
+    })
+
+#カレンダーAPI
+@app.route("/api/calendar_data")
+@login_required
+def calendar_data():
+    # ユーザーの全授業、全期間、全時限データをデータベースから取得
+    courses = UserCourse.query.filter_by(user_id=current_user.id).all()
+    periods = TermPeriod.query.filter_by(user_id=current_user.id).all()
+    pt_data = PeriodTime.query.filter_by(user_id=current_user.id).all()
+
+    # カレンダーのJavaScriptが読み込みやすい形に整形して送る
+    return jsonify({
+        'courses': [
+            {'day': c.day_of_week, 'period': c.period, 'term': c.term, 'name': c.course_name} 
+            for c in courses
+        ],
+        'periods': [
+            {'term': p.term_name, 'start': p.start_date.isoformat(), 'end': p.end_date.isoformat()} 
+            for p in periods
+        ],
+        'period_times': {
+            pt.period: {'start': pt.start_time, 'end': pt.end_time} 
+            for pt in pt_data
+        }
+    })
 #---------------------------------------------------------------------#
 
 with app.app_context():
