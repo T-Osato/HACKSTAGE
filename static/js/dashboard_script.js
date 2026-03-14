@@ -1,117 +1,163 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. 時間入力欄の便利化 (flatpickr)
-    flatpickr("#event-start-time", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
-    flatpickr("#event-end-time", { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true });
-
-    // 2. データの取得
-    const calendarEl = document.getElementById('calendar');
-    let localEvents = JSON.parse(localStorage.getItem("events")) || [];
+    // 1. 時間入力欄 (flatpickr) の設定
+    const timeConfig = { 
+        enableTime: true, 
+        noCalendar: true, 
+        dateFormat: "H:i", 
+        time_24hr: true, 
+        minuteIncrement: 15, 
+        allowInput: false 
+    };
     
-    // HTML側で定義した adminEvents を取得（念のため空配列で保護）
-    const adminEventsData = typeof adminEvents !== 'undefined' ? adminEvents : [];
-
-    // 3. データの整形（個人の予定をFullCalendar形式に）
-    const mappedLocalEvents = localEvents.map(e => {
-        if (e.isWeekly) {
-            return { title: e.title, startTime: e.startTime, endTime: e.endTime, daysOfWeek: [e.dayOfWeek], color: e.color };
-        } else {
-            return { title: e.title, start: e.date + "T" + e.startTime, end: e.date + "T" + e.endTime, color: e.color };
-        }
+    const startTimePicker = flatpickr("#event-start-time", { 
+        ...timeConfig, 
+        onChange: (selectedDates, timeStr) => endTimePicker.set('minTime', timeStr) 
     });
+    const endTimePicker = flatpickr("#event-end-time", { ...timeConfig });
 
-    // ★重要：管理者の予定と個人の予定を合体！
-    const allEvents = mappedLocalEvents.concat(adminEventsData);
+    // 2. 要素とデータの取得
+    const calendarEl = document.getElementById('calendar');
+    if (!calendarEl) return; 
 
-    // 4. カレンダーの初期化
+    let localEvents = JSON.parse(localStorage.getItem("events")) || [];
+    const adminEventsData = typeof adminEvents !== 'undefined' ? adminEvents : [];
+    const modal = document.getElementById("event-modal");
+    let editingEventId = null;
+
+    // 3. カレンダーの初期化
     const calendar = new FullCalendar.Calendar(calendarEl, {
+        customButtons: {
+            addEventButton: { 
+                text: '＋ 予定を追加', 
+                click: () => openModalForAdd() 
+            }
+        },
         initialView: 'dayGridMonth',
         locale: 'ja',
         height: 'auto',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        headerToolbar: { 
+            left: 'prev,next today', 
+            center: 'title', 
+            right: 'addEventButton dayGridMonth,timeGridWeek,timeGridDay' 
         },
-        events: allEvents, // 合体したデータを渡す
-
-        dateClick: function (info) {
-            const modal = document.getElementById("event-modal");
-            modal.classList.add("show");
-            
-            const saveBtn = document.getElementById("save-event");
-            const cancelBtn = document.getElementById("cancel-event");
-            cancelBtn.onclick = () => modal.classList.remove("show");
-
-            saveBtn.onclick = function () {
-                const title = document.getElementById("event-title").value;
-                const startTime = document.getElementById("event-start-time").value;
-                const endTime = document.getElementById("event-end-time").value;
-                if (!title || !startTime || !endTime) return alert("入力漏れがあります");
-
-                const newEvent = {
-                    title: title,
-                    date: info.dateStr,
-                    startTime: startTime,
-                    endTime: endTime,
-                    isWeekly: document.getElementById("event-weekly").checked,
-                    dayOfWeek: new Date(info.dateStr).getDay(),
-                    color: document.getElementById("event-color").value
-                };
-                localEvents.push(newEvent);
-                localStorage.setItem("events", JSON.stringify(localEvents));
-                location.reload(); 
-            };
-        },
-
-        eventClick: function (info) {
-            // 管理者の予定（赤・青）か個人の予定かを判別して表示を変えることも可能です
-            const isCourseEvent = info.event.title.includes("【コース】");
-            let msg = isCourseEvent ? "（コースの予定です）\n" : "";
-            
-            if (confirm(msg + "「" + info.event.title + "」を削除しますか？\n※個人の予定以外は消せません。")) {
-                if (!isCourseEvent) {
-                    localEvents = localEvents.filter(e => e.title !== info.event.title);
-                    localStorage.setItem("events", JSON.stringify(localEvents));
-                    info.event.remove();
-                    location.reload();
-                } else {
-                    alert("管理者による配信予定は、個人で削除することはできません。");
+        events: function(info, successCallback) {
+            const formattedLocal = localEvents.map(e => ({
+                id: e.id, 
+                title: e.title, 
+                start: e.date + (e.startTime ? "T" + e.startTime : ""), 
+                end: e.date + (e.endTime ? "T" + e.endTime : ""), 
+                color: e.color,
+                extendedProps: { 
+                    description: e.description, 
+                    startTime: e.startTime, 
+                    endTime: e.endTime, 
+                    isWeekly: e.isWeekly, 
+                    isLocal: true 
                 }
-            }
-        }
+            }));
+            successCallback(formattedLocal.concat(adminEventsData));
+        },
+        eventClick: (info) => openModalForDetail(info.event)
     });
-
     calendar.render();
-    showTodaySchedule(allEvents);
-});
 
-// 今日の予定リスト表示
+    // 4. モーダル制御関数
+    function openModalForAdd() {
+        editingEventId = null;
+        resetModalFields();
+        document.getElementById("modal-title-text").textContent = "予定の追加";
+        document.getElementById("event-date").value = new Date().toLocaleDateString('sv-SE');
+        document.getElementById("delete-event").style.display = "none";
+        modal.classList.add("show");
+    }
+
+    function openModalForDetail(event) {
+        editingEventId = event.id;
+        const isLocal = event.extendedProps.isLocal;
+        resetModalFields();
+
+        document.getElementById("modal-title-text").textContent = isLocal ? "予定の詳細・編集" : "予定の詳細（閲覧のみ）";
+        document.getElementById("event-title").value = event.title;
+        document.getElementById("event-date").value = event.startStr.split("T")[0];
+        document.getElementById("event-start-time").value = event.extendedProps.startTime || "";
+        document.getElementById("event-end-time").value = event.extendedProps.endTime || "";
+        document.getElementById("event-description").value = event.extendedProps.description || "";
+        document.getElementById("event-color").value = event.backgroundColor || "#4da6ff";
+        
+        // ローカル予定（自分の予定）の時だけ保存・削除ボタンを出す
+        document.getElementById("delete-event").style.display = isLocal ? "inline-block" : "none";
+        document.getElementById("save-event").style.display = isLocal ? "inline-block" : "none";
+        
+        modal.classList.add("show");
+    }
+
+    // 保存ボタン
+    document.getElementById("save-event").onclick = function() {
+        const title = document.getElementById("event-title").value;
+        const date = document.getElementById("event-date").value;
+        if (!title || !date) return alert("予定名と日付は必須です");
+
+        const eventData = { 
+            id: editingEventId || "ev_" + Date.now(), 
+            title: title, 
+            date: date, 
+            startTime: document.getElementById("event-start-time").value, 
+            endTime: document.getElementById("event-end-time").value, 
+            description: document.getElementById("event-description").value, 
+            color: document.getElementById("event-color").value 
+        };
+
+        if (editingEventId) { 
+            const idx = localEvents.findIndex(e => e.id === editingEventId); 
+            if (idx !== -1) localEvents[idx] = eventData; 
+        } else { 
+            localEvents.push(eventData); 
+        }
+        
+        saveAndReload();
+    };
+
+    // 削除ボタン
+    document.getElementById("delete-event").onclick = function() {
+        if (confirm("この予定を削除しますか？")) {
+            localEvents = localEvents.filter(e => e.id !== editingEventId);
+            saveAndReload();
+        }
+    };
+
+    // キャンセルボタン
+    document.getElementById("cancel-event").onclick = () => modal.classList.remove("show");
+
+    // 背景クリックで閉じる
+    window.onclick = (event) => { 
+        if (event.target == modal) modal.classList.remove("show"); 
+    };
+
+    function saveAndReload() {
+        localStorage.setItem("events", JSON.stringify(localEvents));
+        location.reload();
+    }
+
+    function resetModalFields() {
+        const ids = ["event-title", "event-date", "event-start-time", "event-end-time", "event-description"];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
+    }
+
+    // 初回の今日の予定表示
+    showTodaySchedule(localEvents.concat(adminEventsData));
+}); // <-- ここが DOMContentLoaded の閉じカッコ
+
+// 今日の予定を表示する関数（外に出しておく）
 function showTodaySchedule(allEvents) {
     const list = document.getElementById("today-schedule-list");
     if (!list) return;
-    list.innerHTML = "";
-
-    const todayObj = new Date();
-    const todayStr = todayObj.toLocaleDateString('sv-SE'); // YYYY-MM-DD形式
-    const dayOfWeek = todayObj.getDay();
-
-    const todayEvents = allEvents.filter(e => {
-        const eDate = e.start ? e.start.split("T")[0] : e.date;
-        return eDate === todayStr || (e.daysOfWeek && e.daysOfWeek.includes(dayOfWeek));
-    });
-
-    if (todayEvents.length === 0) {
-        list.innerHTML = "<li>今日の予定はありません</li>";
-        return;
-    }
-
-    todayEvents.forEach(e => {
-        const li = document.createElement("li");
-        li.className = "task";
-        li.innerHTML = `
-            <span style="background:${e.color || '#4da6ff'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>
-            <span>${e.title}</span>
-        `;
-        list.appendChild(li);
-    });
+    const today = new Date().toLocaleDateString('sv-SE');
+    const items = allEvents.filter(e => (e.start ? e.start.split("T")[0] : e.date) === today);
+    
+    list.innerHTML = items.length 
+        ? items.map(e => `<li class="task"><span style="background:${e.color || '#4da6ff'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>${e.title}</li>`).join('') 
+        : "<li>今日の予定はありません</li>";
 }

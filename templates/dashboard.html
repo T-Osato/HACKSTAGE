@@ -1,69 +1,83 @@
 <!DOCTYPE html>
-
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/dashboard_style.css">
+    <title>ダッシュボード | キャンパスツール</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_style.css') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <title>ダッシュボード</title>
 </head>
-<!-- 予定追加ウィンドウ -->
-<div id="event-modal" class="modal">
-    <div class="modal-content">
-
-        <h2>予定追加</h2>
-
-        <label>予定名</label>
-        <input type="text" id="event-title">
-
-        <label>開始時間</label>
-        <input type="text" id="event-start-time">
-
-        <label>終了時間</label>
-        <input type="text" id="event-end-time">
-        <label><input type="checkbox" id="event-weekly"> 毎週繰り返す</label>
-
-        <label>カラー</label>
-        <select id="event-color" class="event-color">
-            <option value="#4da6ff">ブルー</option>
-            <option value="#ff4d4d">レッド</option>
-            <option value="#4dff88">グリーン</option>
-            <option value="#ffdb4d">イエロー</option>
-            <option value="#d44dff">パープル</option>
-        </select>
-
-        <div class="modal-buttons">
-            <button id="save-event" class="save-event">追加</button>
-            <button id="cancel-event" class="cancel-event">キャンセル</button>
-        </div>
-
-    </div>
-</div>
-
 <body>
     {% include 'header.html' %}
-    <div class="main">
-        <!--左側カレンダー-->
-        <div id="calendar" class="calendar">
-        </div>
 
-        <!--右側予定一覧-->
-        <div id="today-schedule" class="today-schedule">
-            <div id="today-schedule-header" class="today-schedule-header">
-                <h2>今日の予定</h2>
+    <div id="event-modal" class="modal">
+        <div class="modal-content admin-section">
+            <div class="modal-header-container">
+                <h2 id="modal-title-text">予定の詳細</h2>
             </div>
-            <ul id="today-schedule-list" class="today-schedule-list">
-            </ul>
+
+            <div class="admin-form">
+                <div class="form-group">
+                    <label>日付</label>
+                    <input type="date" id="event-date">
+                </div>
+
+                <div class="form-group">
+                    <label>予定名</label>
+                    <input type="text" id="event-title" placeholder="予定の名前">
+                </div>
+
+                <div class="time-grid">
+                    <div class="form-group">
+                        <label>開始時刻</label>
+                        <input type="text" id="event-start-time" placeholder="--:--" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>終了時刻</label>
+                        <input type="text" id="event-end-time" placeholder="--:--" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>備考・詳細</label>
+                    <textarea id="event-description" rows="2" placeholder="詳細なメモ..."></textarea>
+                </div>
+
+                <div class="modal-options-row">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="event-weekly">
+                        <span>毎週繰り返す</span>
+                    </label>
+                    <select id="event-color">
+                        <option value="#4da6ff">ブルー</option>
+                        <option value="#ff4d4d">レッド</option>
+                        <option value="#4dff88">グリーン</option>
+                        <option value="#ffdb4d">イエロー</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer-btns">
+                    <button id="delete-event" class="delete-btn-admin">削除</button>
+                    <button id="cancel-event" class="btn-secondary">キャンセル</button>
+                    <button id="save-event" class="admin-submit-btn">保存する</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <script>
-        // Flaskから渡されたJSONデータをJavaScriptの変数として保存
-        const adminEvents = {{ events_json | safe }};
-    </script>
+    <main class="main">
+        <div id="calendar" class="calendar"></div>
+        <aside class="today-schedule">
+            <div class="today-schedule-header">
+                <h2>今日の予定</h2>
+            </div>
+            <ul id="today-schedule-list" class="today-schedule-list"></ul>
+        </aside>
+    </main>
+
+    <script>const adminEvents = {{ events_json | safe }};</script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script src="../static/js/dashboard_script.js"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_script.js') }}"></script>
 </body>
-
 </html>
