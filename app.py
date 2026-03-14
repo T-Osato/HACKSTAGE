@@ -198,6 +198,32 @@ def threads():
         
         # 3. 作成後は掲示板トップにリダイレクト
         return redirect(url_for('threads'))
+
+@app.route("/calendar")
+def calendar():
+    return render_template("calendar.html",user=current_user)
+
+@app.route("/setting")
+def setting():
+    return render_template("setting.html",user=current_user)
+
+@app.route("/change-password")
+def change_password():
+    return render_template("change-password.html",user=current_user)
+
+@app.route("/change-name", methods=['GET', 'POST'])
+def change_name():
+    if not current_user.is_authenticated:
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        new_name = request.form.get('new_name')
+        if new_name:
+            current_user.name = new_name
+            db.session.commit()
+            return redirect(url_for('setting'))
+            
+    return render_template("change-name.html", user=current_user)
     
     #検索処理
     search_query = request.args.get('search','')
