@@ -125,3 +125,22 @@ h1 {
     margin-left: 8px;
     opacity: 0.7;
 }
+
+.danger-btn {
+    margin-top: 10px;
+    background-color: #fff5f5;
+    border-color: #fed7d7;
+    color: #c53030;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.danger-btn:hover {
+    background-color: #feb2b2;
+    border-color: #f56565;
+    color: #9b2c2c;
+}

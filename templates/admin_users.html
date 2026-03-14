@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザー管理 - 管理者ページ</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/setting_style.css') }}">
+    <style>
+        .users-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .users-table th, .users-table td { 
+            border: 1px solid #edf2f7; 
+            padding: 12px 15px; 
+            text-align: left; 
+        }
+        .users-table th { 
+            background-color: #f7fafc; 
+            color: #4a5568; 
+            font-weight: bold; 
+        }
+        .users-table tr:hover {
+            background-color: #f0f7ff;
+        }
+        .delete-btn-admin { 
+            background-color: #fff5f5; 
+            color: #e53e3e; 
+            border: 1px solid #fc8181; 
+            padding: 6px 12px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .delete-btn-admin:hover { 
+            background-color: #fed7d7; 
+            box-shadow: 0 2px 4px rgba(229, 62, 62, 0.2);
+        }
+        .flash-message { 
+            padding: 15px; 
+            background-color: #e6fffa; 
+            color: #234e52;
+            border-left: 4px solid #319795; 
+            margin-bottom: 20px; 
+            border-radius: 4px; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+    
+    <main class="main-content">
+        <div class="setting-container" style="max-width: 800px;">
+            <h1>ユーザー管理</h1>
+            
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% for message in messages %}
+                  <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+            
+            <section class="link-menu" style="padding: 20px;">
+                <h2>登録ユーザー一覧</h2>
+                
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>学籍番号</th>
+                            <th>名前</th>
+                            <th>権限設定</th>
+                            <th>アカウント操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.id }}</td>
+                            <td>{{ u.student_id }}</td>
+                            <td><strong>{{ u.name }}</strong></td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {% if u.role == 'admin' %}
+                                        <span style="color: #d69e2e; font-weight: bold;">管理者</span>
+                                    {% else %}
+                                        <span style="color: #718096;">一般ユーザー</span>
+                                    {% endif %}
+                                    
+                                    {% if u.id != current_user.id %}
+                                    <form action="{{ url_for('toggle_user_role', target_user_id=u.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" style="background: #ebf8ff; color: #3182ce; border: 1px solid #90cdf4; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; cursor: pointer;">
+                                            切替
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if u.id != current_user.id %}
+                                <form action="{{ url_for('delete_user', target_user_id=u.id) }}" method="POST" style="display:inline;">
+                                    <button type="submit" class="delete-btn-admin" onclick="return confirm('ユーザー「{{ u.name }}」を削除しますか？\n（このユーザーが立てたスレッドと全コメントも同時に道連れで削除されます。元には戻せません！）')">
+                                        ユーザー削除
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span style="color: #a0aec0; font-size: 0.9em;">(あなた自身です)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-top: 25px;">
+                    <a href="{{ url_for('setting') }}" style="color: #3182ce; text-decoration: none; font-weight: bold;">← 個人設定に戻る</a>
+                </div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

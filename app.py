@@ -259,6 +259,33 @@ def change_name():
             return redirect(url_for('setting'))
             
     return render_template("change-name.html", user=current_user)
+
+@app.route("/delete-account", methods=["POST"])
+@login_required
+def delete_account():
+    user_id = current_user.id
+    user_name = current_user.name
+    
+    # ユーザーに関連するデータを削除
+    # ユーザーのコメントを削除
+    for comment in Comment.query.filter_by(user_id=user_id).all():
+        db.session.delete(comment)
+        
+    # ユーザーが立てたスレッド(とそれに紐づくコメント)を削除
+    for thread in Thread.query.filter_by(user_id=user_id).all():
+        for c in thread.comments:
+            db.session.delete(c)
+        db.session.delete(thread)
+        
+    # ユーザーを削除
+    db.session.delete(current_user)
+    db.session.commit()
+    
+    # ログアウトさせる
+    logout_user()
+    
+    flash(f"アカウント [{user_name}] を削除しました。ご利用ありがとうございました。")
+    return redirect(url_for("login"))
     
     
 
@@ -296,6 +323,70 @@ def delete_thread(thread_id):
 
     #削除後は一覧ページへ戻る
     return redirect(url_for('threads'))
+
+@app.route("/admin/users")
+@login_required
+def admin_users():
+    # 管理者権限チェック
+    if current_user.role != 'admin':
+        abort(403)
+    users = User.query.all()
+    return render_template("admin_users.html", users=users)
+
+@app.route("/admin/users/<int:target_user_id>/delete", methods=["POST"])
+@login_required
+def delete_user(target_user_id):
+    # 管理者権限チェック
+    if current_user.role != 'admin':
+        abort(403)
+        
+    # 自分自身は削除できないように保護
+    if current_user.id == target_user_id:
+        flash("自分自身を削除することはできません。")
+        return redirect(url_for("admin_users"))
+        
+    target_user = User.query.get_or_404(target_user_id)
+    
+    # このユーザーが投稿したコメントを全て削除
+    for comment in Comment.query.filter_by(user_id=target_user.id).all():
+        db.session.delete(comment)
+        
+    # このユーザーが立てたスレッド(とそれに紐づくコメント)を全て削除
+    for thread in Thread.query.filter_by(user_id=target_user.id).all():
+        for c in thread.comments:
+            db.session.delete(c)
+        db.session.delete(thread)
+        
+    # ユーザーを削除
+    db.session.delete(target_user)
+    db.session.commit()
+    
+    flash(f"ユーザー [{target_user.name}] を削除しました。")
+    return redirect(url_for("admin_users"))
+
+@app.route("/admin/users/<int:target_user_id>/toggle-role", methods=["POST"])
+@login_required
+def toggle_user_role(target_user_id):
+    # 管理者権限チェック
+    if current_user.role != 'admin':
+        abort(403)
+        
+    # 自分自身の権限は変更できないようにする（管理者がいなくなるのを防ぐ）
+    if current_user.id == target_user_id:
+        flash("自分自身の権限を変更することはできません。")
+        return redirect(url_for("admin_users"))
+        
+    target_user = User.query.get_or_404(target_user_id)
+    
+    # ロールを切り替え
+    if target_user.role == 'admin':
+        target_user.role = 'user'
+    else:
+        target_user.role = 'admin'
+        
+    db.session.commit()
+    flash(f"ユーザー [{target_user.name}] の権限を [{target_user.role}] に変更しました。")
+    return redirect(url_for("admin_users"))
 
 with app.app_context():
     db.create_all()

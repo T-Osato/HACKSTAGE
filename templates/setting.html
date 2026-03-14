@@ -43,11 +43,18 @@
                     </li>
                     {% if user.role == 'admin' %}
                     <li>
-                        <a href="" class="link-item admin-btn">
-                            <span>管理者権限ページ</span>
+                        <a href="{{ url_for('admin_users') }}" class="link-item admin-btn">
+                            <span>管理者権限ページ（ユーザー管理）</span>
                         </a>
                     </li>
                     {% endif %}
+                    <li style="margin-top: 20px;">
+                        <form action="{{ url_for('delete_account') }}" method="POST" onsubmit="return confirm('本当にアカウントを削除しますか？\nこの操作は取り消せません。投稿した掲示板の内容なども全て削除されます。');">
+                            <button type="submit" class="link-item danger-btn">
+                                <span>アカウントを削除する</span>
+                            </button>
+                        </form>
+                    </li>
                 </ul>
             </section>
         </div>
