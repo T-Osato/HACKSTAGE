@@ -1,173 +1,213 @@
-/* threads_style.css */
+:root {
+    --primary-color: #4da6ff;
+    --secondary-color: #cfeeff;
+    --bg-color: #f8fbff;
+    --text-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
 
-/* 背景などは前回の body::before を継承 (省略可) */
 body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
     margin: 0;
-    min-height: 100vh;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    background: #222; /* 仮の背景色 */
-    color: white;
-    display: block; /* 一覧なので上から下に並べる */
-    padding: 20px;
+    color: var(--text-color);
 }
 
 .main-container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
-    padding-top: 95px; /* 75px header + 20px margin */
+    padding: 95px 20px 40px;
+    animation: fadeIn 0.5s ease-out;
 }
 
-/* 共通のグラスモーフィズム設定 */
-.glass-box, .thread-block {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 15px;
-    padding: 20px;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 共通タイトル */
+h1 {
+    font-size: 26px;
+    font-weight: 700;
     margin-bottom: 20px;
+    color: #2c5282;
+    border-left: 6px solid var(--primary-color);
+    padding-left: 15px;
 }
 
-/* スレッド作成フォーム */
-.create-thread-section h3 {
-    margin-top: 0;
+/* グラスモーフィズム設定 */
+.glass-box {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(77, 166, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 25px var(--shadow-color);
 }
 
-.create-thread-section input, .create-thread-section textarea {
+/* 検索セクション */
+.search-section .glass-box {
+    padding: 15px 20px;
+}
+
+.search-section input {
+    border: 1px solid #edf2f7 !important;
+    background: white !important;
+    color: #333 !important;
+    transition: 0.3s;
+}
+
+.search-section input:focus {
+    border-color: var(--primary-color) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.2);
+}
+
+/* フォーム入力 */
+.input-group input, .input-group textarea {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border: none;
-    font-family: inherit;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    border: 1px solid #edf2f7;
+    background: #fcfcfc;
+    font-size: 15px;
+    transition: 0.3s;
+    box-sizing: border-box;
 }
 
+.input-group input:focus, .input-group textarea:focus {
+    border-color: var(--primary-color);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.1);
+}
+
+/* ボタン */
 .post-btn {
-    background: #4CAF50;
+    background: linear-gradient(135deg, #4da6ff, #3182ce);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 700;
     cursor: pointer;
-    width: 100%;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
 }
 
-/* スレッド一覧のブロック */
+.post-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(77, 166, 255, 0.4);
+    filter: brightness(1.05);
+}
+
+/* スレッド一覧 */
+.thread-list h3 {
+    font-size: 18px;
+    color: #718096;
+    margin: 30px 0 15px;
+    letter-spacing: 0.05em;
+}
+
 .thread-block {
+    background: white;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
     cursor: pointer;
-    transition: transform 0.2s, background 0.2s;
+    transition: 0.3s;
+    position: relative;
 }
 
 .thread-block:hover {
-    transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.thread-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .thread-title {
-    margin: 10px 0;
-    font-size: 1.4rem;
-    font-weight: bold;
+    font-size: 1.2rem;
+    color: #2d3748;
+    margin: 0 0 10px 0;
 }
 
 .tag-badge {
-    background: #3498db;
-    padding: 4px 10px;
+    background: #ebf8ff;
+    color: #3182ce;
+    padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.8rem;
-    margin-right: 10px;
+    font-weight: 600;
 }
 
 .created-at {
     font-size: 0.8rem;
-    color: #ccc;
+    color: #a0aec0;
 }
 
 .thread-footer {
-    text-align: right;
+    border-top: 1px solid #f7fafc;
+    padding-top: 10px;
     font-size: 0.9rem;
-    color: #eee;
+    color: #718096;
+    display: flex;
+    justify-content: space-between;
 }
 
-.author-name {
-    font-weight: bold;
-    text-decoration: underline;
+/* 詳細ページ */
+.thread-main {
+    background: white;
 }
 
-.thread-link-container {
-    text-decoration: none; /* 下線を消す */
-    color: inherit;        /* 文字色を継承する */
-    display: block;        /* ブロック要素にして全体をクリック可能にする */
-}
-
-/* --- 返信エリア全体の調整 --- */
-.reply-form {
-    margin-top: 40px;
-}
-
-.reply-form h4 {
-    margin-bottom: 20px;
-    font-size: 1.2rem;
-    border-left: 4px solid #4CAF50; /* アクセントの緑ライン */
-    padding-left: 10px;
-}
-
-/* --- テキストエリア（入力欄）の調整 --- */
-.reply-form textarea {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.9); /* 少し透ける白 */
-    border: none;
-    border-radius: 10px;
-    padding: 15px;
-    font-family: inherit;
-    font-size: 1rem;
-    color: #333;
-    box-sizing: border-box; /* パディングを含めて100%にする */
-    resize: vertical; /* 縦方向のみリサイズ可能に */
-    min-height: 100px;
-    margin-bottom: 15px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.reply-form textarea:focus {
-    outline: 2px solid #4CAF50;
-    background: #fff;
-}
-
-/* --- 返信ボタンの調整 --- */
-.reply-form .post-btn {
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    height: 50px;
+.thread-body {
     font-size: 1.1rem;
-    letter-spacing: 1px;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    line-height: 1.8;
+    color: #4a5568;
+    margin: 25px 0;
+    white-space: pre-wrap;
 }
 
-.reply-form .post-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-    filter: brightness(1.1);
+.comment-block {
+    background: #f8fafc;
+    border-left: 4px solid var(--primary-color);
 }
 
-/* static/css/threads_style.css に追加 */
-
-.admin-actions {
-    margin-top: 15px;
+.comment-footer {
+    font-size: 0.85rem;
+    color: #718096;
 }
 
 .delete-btn {
-    background: rgba(255, 68, 68, 0.2); /* 透明感のある赤 */
-    color: #ff4444;
-    border: 1px solid #ff4444;
-    padding: 5px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.85rem;
-    transition: 0.3s;
+    background: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
 }
 
 .delete-btn:hover {
-    background: #ff4444;
-    color: white;
-    box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+    background: #feb2b2;
 }
+
+.navigation .back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #3182ce;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.navigation .back-link:hover {
+    text-decoration: underline;
+}
