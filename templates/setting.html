@@ -8,9 +8,7 @@
 </head>
 
 <body>
-    <!-- ヘッダーの読み込み -->
-    <div id="header" data-user-name="{{ user.name }}"></div>
-
+    {% include 'header.html' %}
     <main class="main-content">
         <div class="setting-container">
             <h1>個人設定</h1>
@@ -54,7 +52,6 @@
             </section>
         </div>
     </main>
-    <script src="../static/js/header-fetch.js"></script>
 </body>
 
 </html>

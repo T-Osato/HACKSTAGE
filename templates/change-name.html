@@ -10,9 +10,7 @@
 </head>
 
 <body>
-    <!-- ヘッダーの読み込み -->
-    <div id="header" data-user-name="{{ user.name }}"></div>
-
+    {% include 'header.html' %}
     <main>
         <h1>名前の変更</h1>
         <form action="/change-name" method="post">
@@ -28,8 +26,6 @@
             </ul>
         </form>
     </main>
-
-    <script src="../static/js/header-fetch.js"></script>
 </body>
 
 </html>
