@@ -1,0 +1,41 @@
+.link-menu{
+    margin: top 40px;
+}
+
+.link-menu h2{
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #666;
+}
+
+.link-list{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.link-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.link-item:hover{
+    background-color: #e9ecef;
+}
+
+.admin-btn{
+    background-color: #fff5f5;
+    border-color: #feb2b2;
+    color: #c53030;
+    font-weight: bold;
+}
+
+.admin-btn:hover{
+    background-color: #fed7d7;
+}
