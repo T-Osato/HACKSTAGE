@@ -364,6 +364,30 @@ def delete_user(target_user_id):
     flash(f"ユーザー [{target_user.name}] を削除しました。")
     return redirect(url_for("admin_users"))
 
+@app.route("/admin/users/<int:target_user_id>/toggle-role", methods=["POST"])
+@login_required
+def toggle_user_role(target_user_id):
+    # 管理者権限チェック
+    if current_user.role != 'admin':
+        abort(403)
+        
+    # 自分自身の権限は変更できないようにする（管理者がいなくなるのを防ぐ）
+    if current_user.id == target_user_id:
+        flash("自分自身の権限を変更することはできません。")
+        return redirect(url_for("admin_users"))
+        
+    target_user = User.query.get_or_404(target_user_id)
+    
+    # ロールを切り替え
+    if target_user.role == 'admin':
+        target_user.role = 'user'
+    else:
+        target_user.role = 'admin'
+        
+    db.session.commit()
+    flash(f"ユーザー [{target_user.name}] の権限を [{target_user.role}] に変更しました。")
+    return redirect(url_for("admin_users"))
+
 with app.app_context():
     db.create_all()
 

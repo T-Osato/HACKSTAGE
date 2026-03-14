@@ -87,11 +87,21 @@
                             <td>{{ u.student_id }}</td>
                             <td><strong>{{ u.name }}</strong></td>
                             <td>
-                                {% if u.role == 'admin' %}
-                                    <span style="color: #d69e2e; font-weight: bold;">管理者</span>
-                                {% else %}
-                                    <span style="color: #718096;">一般ユーザー</span>
-                                {% endif %}
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {% if u.role == 'admin' %}
+                                        <span style="color: #d69e2e; font-weight: bold;">管理者</span>
+                                    {% else %}
+                                        <span style="color: #718096;">一般ユーザー</span>
+                                    {% endif %}
+                                    
+                                    {% if u.id != current_user.id %}
+                                    <form action="{{ url_for('toggle_user_role', target_user_id=u.id) }}" method="POST" style="display:inline;">
+                                        <button type="submit" style="background: #ebf8ff; color: #3182ce; border: 1px solid #90cdf4; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; cursor: pointer;">
+                                            切替
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
                             </td>
                             <td>
                                 {% if u.id != current_user.id %}
