@@ -1,0 +1,73 @@
+/* コンテナ：カードを横並びにする */
+.log-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 画面幅に合わせて自動調整 */
+    gap: 20px;
+    padding: 20px 0;
+}
+
+/* カード本体 */
+.log-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.log-card:hover {
+    transform: translateY(-5px); /* マウスを乗せると少し浮く */
+}
+
+/* カード内の配置 */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.log-title {
+    margin: 8px 0;
+    font-size: 1.2rem;
+}
+
+.log-title a {
+    text-decoration: none;
+    color: #333;
+}
+
+.log-title a:hover {
+    color: #007bff;
+}
+
+.category-tag {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.delete-btn {
+    color: #ff4d4d;
+    text-decoration: none;
+    font-size: 0.8rem;
+    border: 1px solid #ff4d4d;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.card-footer {
+    margin-top: 15px;
+    text-align: right;
+}

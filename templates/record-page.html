@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record-page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/record-page.css')}}">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>My Memory log</h1>
+            <nav class="main-nav">
+                <a href="{{ url_for('show_list') }}">一覧を見る</a>
+            </nav>
+        </header>
+
+        <form action="{{ url_for('save_log') }}" method="POST">
+            <div class="form-item">
+                <label for="category">カテゴリー</label>
+                <select name="category" id="category">
+                    <option value="place">場所</option>
+                    <option value="food">食べ物</option>
+                    <option value="book">本</option>
+                    <option value="movie">映画</option>
+                    <option value="other">その他</option>
+                </select>
+            </div>
+
+            <div class="form-item">
+                <label for="status">ステータス</label>
+                <select name="status"  id="status">
+                    <option value="wish">Wish</option>
+                    <option value="done">Done</option>
+                </select>
+            </div>
+
+            <div class="form-item">
+                <label for="title">タイトル</label>
+                <input type="text" name="title" id="title" placeholder="本の名前、場所の名称など" required>
+            </div>
+
+            <div class="form-item">
+                <label for="date">日付</label>
+                <input type="date" name="date" id="date">
+            </div>
+
+            <div class="form-item">
+                <label for="content">内容・メモ</label>
+                <textarea type="content" id="content" rows="10" placeholder="感想等を自由に書いて"></textarea>
+            </div>
+
+            <div class="form-item">
+                <label for="image">写真</label>
+                <input type="file" name="blog_image" id="image" accept="image/*">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">この記録を保存する</button>
+                <a href="" class="cancel-link">やめる</a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

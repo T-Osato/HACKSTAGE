@@ -85,6 +85,16 @@ class Comment(db.Model):
     thread = db.relationship('Thread', backref=db.backref('comments', lazy=True))
     author = db.relationship('User', backref=db.backref('comments', lazy=True))
 
+# 個人のメモ（Memory Log）モデルを追加
+class MemoryLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(20))
+    title = db.Column(db.String(100))
+    category = db.Column(db.String(50))
+    status = db.Column(db.String(20))
+    # 誰のデータか保存する箱（Userモデルと紐付け）
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
 
 #---------------------------------------------------------------------#
 
@@ -386,6 +396,57 @@ def toggle_user_role(target_user_id):
 
 with app.app_context():
     db.create_all()
+
+@app.route('/record')
+@login_required
+def record_page():
+    return render_template('record-page.html')
+
+@app.route('/save', methods=['POST'])
+@login_required
+def save_log():
+    new_log = MemoryLog(
+        date=request.form.get('date'),
+        title=request.form.get('title'),
+        category=request.form.get('category'),
+        status=request.form.get('status'),
+        user_id=current_user.id
+    )
+    db.session.add(new_log)
+    db.session.commit()
+    # 保存が終わったら一覧画面に
+    return redirect(url_for('show_list'))
+
+@app.route('/list')
+@login_required
+def show_list():
+    # 自分のIDのものだけを絞り込む
+    user_logs = MemoryLog.query.filter_by(user_id=current_user.id).all()
+    return render_template('record-list.html', logs=user_logs)
+@app.route('/delete-log/<int:id>')
+@login_required
+def delete_log(id):
+    log = MemoryLog.query.get_or_404(id)
+    if log.user_id != current_user.id:
+        abort(403)
+    db.session.delete(log)
+    db.session.commit()
+    return redirect(url_for('show_list'))
+
+@app.route('/edit-log/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_log(id):
+    log = MemoryLog.query.get_or_404(id)
+    if log.user_id != current_user.id:
+        abort(403)
+    if request.method == 'POST':
+        log.date = request.form.get('date')
+        log.title = request.form.get('title')
+        log.category = request.form.get('category')
+        log.status = request.form.get('status')
+        db.session.commit()
+        return redirect(url_for('show_list'))
+    return render_template('edit-log.html', log=log)
 
 if __name__  == "__main__":
     app.run(debug=True)               

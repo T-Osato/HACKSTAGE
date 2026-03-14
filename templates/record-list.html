@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>record-list</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/record-list.css')}}">
+</head>
+<body>
+    <header>
+        <h1>My Memory Log</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('record_page') }}">新しく記録する</a>
+        </nav>
+    </header>
+
+    <main>
+        <nav class="filter-nav">
+            <form action="{{ url_for('show_list') }}" method="GET" class="filter-form">
+            </form>
+        </nav>
+
+        <div class="log-container">
+            {% for log in logs %}
+            <article class="log-card">
+                <div class="card-header">
+                    <span class="log-date">{{ log.date }}</span>
+                    <span class="badge status-{{ log.status | lower }}">{{ log.status }}</span>
+                </div>
+                <div class="card-body">
+                    <h2 class="log-title">{{ log.title }}</h2>
+                    <p class="category-tag">{{ log.category }}</p>
+        
+                    <div class="card-footer">
+                        <a href="{{ url_for('edit_log', id=log.id) }}" class="edit-btn">編集</a>
+                        <a href="{{ url_for('delete_log', id=log.id) }}" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

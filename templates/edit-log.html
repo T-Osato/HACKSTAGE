@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>記録を編集</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/record-page.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Edit Memory</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('show_list') }}">一覧に戻る</a>
+        </nav>
+    </header>
+
+    <main>
+        <form action="{{ url_for('edit_log', id=log.id) }}" method="POST">
+            <div class="form-item">
+                <label>カテゴリー</label>
+                <select name="category">
+                    <option value="place" {% if log.category == 'place' %}selected{% endif %}>場所</option>
+                    <option value="food" {% if log.category == 'food' %}selected{% endif %}>食べ物</option>
+                    <option value="book" {% if log.category == 'book' %}selected{% endif %}>本</option>
+                    <option value="movie" {% if log.category == 'movie' %}selected{% endif %}>映画</option>
+                    <option value="other" {% if log.category == 'other' %}selected{% endif %}>その他</option>
+                </select>
+            </div>
+
+            <div class="form-item">
+                <label>ステータス</label>
+                <select name="status">
+                    <option value="wish" {% if log.status == 'wish' %}selected{% endif %}>Wish</option>
+                    <option value="done" {% if log.status == 'done' %}selected{% endif %}>Done</option>
+                </select>
+            </div>
+
+            <div class="form-item">
+                <label>タイトル</label>
+                <input type="text" name="title" value="{{ log.title }}" required>
+            </div>
+
+            <div class="form-item">
+                <label>日付</label>
+                <input type="date" name="date" value="{{ log.date }}">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">変更を保存する</button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
