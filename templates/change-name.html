@@ -11,20 +11,24 @@
 
 <body>
     {% include 'header.html' %}
-    <main>
-        <h1>名前の変更</h1>
-        <form action="/change-name" method="post">
-            <ul>
-                <li>
-                    <label for="new-name">新しい名前</label>
-                    <input type="text" id="new-name" name="new_name" placeholder="新しい名前を入力" required
-                        style="border: 1px solid #ccc; border-radius: 4px; background-color: #fff; padding: 10px; width: 300px;">
-                </li>
-                <li>
-                    <button type="submit" class="submit-btn">名前を保存する</button>
-                </li>
-            </ul>
-        </form>
+    <main class="main-content">
+        <div class="setting-container">
+            <h1>名前の変更</h1>
+            <div class="form-content">
+                <form action="/change-name" method="post">
+                    <ul class="form-list">
+                        <li>
+                            <label for="new-name">新しい名前</label>
+                            <input type="text" id="new-name" name="new_name" placeholder="新しい名前を入力" required>
+                        </li>
+                        <li>
+                            <button type="submit" class="submit-btn">名前を保存する</button>
+                        </li>
+                    </ul>
+                </form>
+            </div>
+            <a href="/setting" class="back-link">← 設定に戻る</a>
+        </div>
     </main>
 </body>
 

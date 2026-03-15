@@ -298,3 +298,52 @@
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* フラッシュメッセージ */
+.flash-messages {
+    position: fixed;
+    top: 85px;
+    right: 20px;
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.flash-message {
+    min-width: 250px;
+    padding: 15px 25px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid #4da6ff;
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+    pointer-events: auto;
+    animation: flashIn 0.3s ease-out, flashOut 0.3s ease-in 4.7s forwards;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.flash-message.error {
+    border-left-color: #ff4d4d;
+}
+
+.flash-message.success {
+    border-left-color: #28a745;
+}
+
+@keyframes flashIn {
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes flashOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(30px); }
+}

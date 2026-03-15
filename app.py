@@ -333,12 +333,34 @@ def calendar():
 def setting():
     return render_template("setting.html",user=current_user)
 
+@app.route("/change-password", methods=['GET', 'POST'])
 #---------------------------------------------------------------------#
 
 @app.route("/change-password")
 @login_required
 def change_password():
-    return render_template("change-password.html",user=current_user)
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        # 現在のパスワードを確認
+        if not check_password_hash(current_user.password, current_password):
+            flash("現在のパスワードが正しくありません", "error")
+            return redirect(url_for('change_password'))
+
+        # 新しいパスワードの不一致を確認
+        if new_password != confirm_password:
+            flash("新しいパスワードが一致しません", "error")
+            return redirect(url_for('change_password'))
+
+        # パスワードを更新
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+        flash("パスワードを変更しました", "success")
+        return redirect(url_for('setting'))
+
+    return render_template("change-password.html", user=current_user)
 
 #---------------------------------------------------------------------#
 
@@ -362,6 +384,7 @@ def change_name():
         if new_name:
             current_user.name = new_name
             db.session.commit()
+            flash("名前を変更しました", "success")
             return redirect(url_for('setting'))
             
     return render_template("change-name.html", user=current_user)
@@ -392,7 +415,7 @@ def delete_account():
     # ログアウトさせる
     logout_user()
     
-    flash(f"アカウント [{user_name}] を削除しました。ご利用ありがとうございました。")
+    flash(f"アカウント [{user_name}] を削除しました。ご利用ありがとうございました。", "success")
     return redirect(url_for("login"))
     
 #---------------------------------------------------------------------#
