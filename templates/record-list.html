@@ -51,7 +51,13 @@
 
             <div class="log-container">
                 {% for log in logs %}
-                <article class="log-card">
+                <article class="log-card" 
+                    data-id="{{ log.id }}" 
+                    data-title="{{ log.title }}" 
+                    data-date="{{ log.date }}" 
+                    data-category="{{ log.category }}" 
+                    data-status="{{ log.status }}" 
+                    data-content="{{ log.content }}">
                     <div class="card-header">
                         <span class="log-date">{{ log.date }}</span>
                         <span class="badge status-{{ log.status | lower }}">
@@ -81,5 +87,87 @@
             </div>
         </div>
     </main>
+
+    <!-- 詳細表示モーダル -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-badge" id="modal-status"></span>
+                <span class="modal-date" id="modal-date"></span>
+            </div>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <p class="modal-category" id="modal-category"></p>
+            <div class="modal-body">
+                <p id="modal-content-text"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="close-btn" onclick="closeDetailModal()">閉じる</button>
+                <div class="modal-actions">
+                    <a id="modal-edit-link" href="#" class="edit-btn">編集</a>
+                    <a id="modal-delete-link" href="#" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.log-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // もし削除ボタンや編集ボタンがクリックされた場合はモーダルを開かない
+                    if(e.target.closest('.card-footer')) return;
+
+                    const id = this.dataset.id;
+                    const title = this.dataset.title;
+                    const date = this.dataset.date;
+                    const category = this.dataset.category;
+                    const status = this.dataset.status;
+                    const content = this.dataset.content;
+
+                    openDetailModal(id, title, date, category, status, content);
+                });
+            });
+        });
+
+        function openDetailModal(id, title, date, category, status, content) {
+            document.getElementById('modal-title').textContent = title;
+            document.getElementById('modal-date').textContent = date;
+            
+            const statusEl = document.getElementById('modal-status');
+            if (status === 'wish') {
+                statusEl.textContent = '⭐Wish';
+                statusEl.className = 'modal-badge status-wish';
+            } else if (status === 'done') {
+                statusEl.textContent = '✅Done';
+                statusEl.className = 'modal-badge status-done';
+            } else {
+                statusEl.textContent = status;
+                statusEl.className = 'modal-badge';
+            }
+
+            document.getElementById('modal-category').textContent = '#' + category;
+            
+            const contentEl = document.getElementById('modal-content-text');
+            contentEl.textContent = content || "内容の記載はありません。";
+            
+            document.getElementById('modal-edit-link').href = '/edit-log/' + id;
+            document.getElementById('modal-delete-link').href = '/delete-log/' + id;
+
+            document.getElementById('detail-modal').classList.add('show');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+
+        // Close on background click
+        window.onclick = function(event) {
+            const modal = document.getElementById('detail-modal');
+            if (event.target == modal) {
+                closeDetailModal();
+            }
+        }
+    </script>
 </body>
 </html>
