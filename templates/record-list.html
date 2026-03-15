@@ -22,6 +22,14 @@
             <nav class="filter-nav">
                 <form action="{{ url_for('show_list') }}" method="GET" class="filter-form">
                     <div class="filter-group">
+                        <label>表示モード</label>
+                        <select name="visibility_filter" id="visibility_filter" onchange="this.form.submit()">
+                            <option value="my_logs" {% if visibility_filter == 'my_logs' %}selected{% endif %}>自分の記録</option>
+                            <option value="public" {% if visibility_filter == 'public' %}selected{% endif %}>みんなの公開記録</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
                         <label>カテゴリー</label>
                         <select name="category_filter" id="category_filter">
                             <option value="">すべて</option>
@@ -57,7 +65,8 @@
                     data-date="{{ log.date }}" 
                     data-category="{{ log.category }}" 
                     data-status="{{ log.status }}" 
-                    data-content="{{ log.content }}">
+                    data-content="{{ log.content }}"
+                    data-is-mine="{{ 'true' if log.user_id == current_user.id else 'false' }}">
                     <div class="card-header">
                         <span class="log-date">{{ log.date }}</span>
                         <span class="badge status-{{ log.status | lower }}">
@@ -73,11 +82,16 @@
                     <div class="card-content">
                         <h2 class="log-title">{{ log.title }}</h2>
                         <p class="category-tag">#{{ log.category }}</p>
+                        {% if visibility_filter == 'public' %}
+                        <p class="author-name">👤 {{ log.author.name if log.author else '名無し' }}</p>
+                        {% endif %}
                     </div>
+                    {% if log.user_id == current_user.id %}
                     <div class="card-footer">
                         <a href="{{ url_for('edit_log', id=log.id) }}" class="edit-btn">編集</a>
                         <a href="{{ url_for('delete_log', id=log.id) }}" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</a>
                     </div>
+                    {% endif %}
                 </article>
                 {% else %}
                 <div class="empty-state">
@@ -124,13 +138,14 @@
                     const category = this.dataset.category;
                     const status = this.dataset.status;
                     const content = this.dataset.content;
+                    const isMine = this.dataset.isMine === 'true';
 
-                    openDetailModal(id, title, date, category, status, content);
+                    openDetailModal(id, title, date, category, status, content, isMine);
                 });
             });
         });
 
-        function openDetailModal(id, title, date, category, status, content) {
+        function openDetailModal(id, title, date, category, status, content, isMine) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-date').textContent = date;
             
@@ -151,8 +166,18 @@
             const contentEl = document.getElementById('modal-content-text');
             contentEl.textContent = content || "内容の記載はありません。";
             
-            document.getElementById('modal-edit-link').href = '/edit-log/' + id;
-            document.getElementById('modal-delete-link').href = '/delete-log/' + id;
+            const editLink = document.getElementById('modal-edit-link');
+            const deleteLink = document.getElementById('modal-delete-link');
+            
+            if (isMine) {
+                editLink.style.display = 'inline-block';
+                deleteLink.style.display = 'inline-block';
+                editLink.href = '/edit-log/' + id;
+                deleteLink.href = '/delete-log/' + id;
+            } else {
+                editLink.style.display = 'none';
+                deleteLink.style.display = 'none';
+            }
 
             document.getElementById('detail-modal').classList.add('show');
         }
