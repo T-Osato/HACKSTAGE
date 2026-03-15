@@ -333,8 +333,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 <li class="task">
                     <div class="task-color-bar" style="background: ${color}"></div>
                     <div class="task-content">
-                        <div class="task-time">${timeStr}</div>
-                        <div class="task-title">${title}</div>
+                        <div class="task-header">
+                            <span class="task-time">${timeStr}</span>
+                            <span class="task-title">${title}</span>
+                        </div>
                         ${description ? `<div class="task-description">${description.replace(/\n/g, '<br>')}</div>` : ''}
                     </div>
                 </li>

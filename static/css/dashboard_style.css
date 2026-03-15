@@ -10,7 +10,7 @@
 }
 
 .calendar { 
-    flex: 3; 
+    flex: 2; 
     background: white; 
     padding: 20px; 
     border-radius: 12px; 
@@ -19,6 +19,7 @@
 
 .today-schedule { 
     flex: 1; 
+    min-width: 400px; /* ある程度の幅を確保 */
     background: #f8fafc; 
     border-radius: 12px; 
     padding: 20px; 
@@ -204,17 +205,27 @@
     overflow: hidden;
 }
 
+.task-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
 .task-time {
-    font-size: 0.75rem;
-    color: #64748b;
-    font-weight: 600;
-    margin-bottom: 2px;
+    font-size: 0.85rem;
+    color: #4da6ff;
+    font-weight: 700;
+    white-space: nowrap;
+    background: #ebf5ff;
+    padding: 2px 8px;
+    border-radius: 4px;
 }
 
 .task-title {
     font-weight: bold;
     color: #2d3748;
-    margin-bottom: 4px;
+    font-size: 1rem;
     line-height: 1.4;
 }
 
