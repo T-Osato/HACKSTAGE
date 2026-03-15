@@ -158,4 +158,51 @@
     to { transform: scale(1); opacity: 1; }
 }
 
-.task { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid #edf2f7; font-size: 0.9rem; }
+.today-schedule-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.task {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 0.9rem;
+    gap: 12px;
+}
+
+.task:last-child {
+    border-bottom: none;
+}
+
+.task-color-bar {
+    width: 4px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.task-content {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.task-time {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.task-title {
+    font-weight: bold;
+    color: #2d3748;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+
+.task-description {
+    font-size: 0.8rem;
+    color: #718096;
+    line-height: 1.5;
+}
