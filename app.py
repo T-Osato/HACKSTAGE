@@ -723,25 +723,41 @@ def get_timetable():
 @app.route("/api/calendar_data")
 @login_required
 def calendar_data():
-    # ユーザーの全授業、全期間、全時限データをデータベースから取得
+    # 1. 授業とターム・時限の取得
     courses = UserCourse.query.filter_by(user_id=current_user.id).all()
     periods = TermPeriod.query.filter_by(user_id=current_user.id).all()
     pt_data = PeriodTime.query.filter_by(user_id=current_user.id).all()
 
-    # カレンダーのJavaScriptが読み込みやすい形に整形して送る
+    # ★ 2. academic_calendar から休日・振替日を取得
+    # 全ユーザー共通のデータだと思うので、user_idの絞り込みは外しています
+    academic_events = AcademicCalendar.query.all()
+    
+    holidays = []
+    substitute_days = {}
+    
+    # 日本語の曜日をJavaScript用のキー（mon, tue...）に変換する辞書
+    day_map = {'月曜日': 'mon', '火曜日': 'tue', '水曜日': 'wed', '木曜日': 'thu', '金曜日': 'fri'}
+
+    for event in academic_events:
+        # 日付を文字列 (YYYY-MM-DD) に変換
+        date_str = event.event_date.strftime('%Y-%m-%d') if hasattr(event.event_date, 'strftime') else str(event.event_date)
+        
+        if event.category == 'holiday':
+            holidays.append(date_str)
+        elif event.category == 'makeup':
+            # makeup_day カラム（画像だと makeup_... になっている部分）を取得して英語に変換
+            target_day_ja = getattr(event, 'makeup_day', None) # ←実際のカラム名に変えてください
+            target_day_en = day_map.get(target_day_ja)
+            if target_day_en:
+                substitute_days[date_str] = target_day_en
+
     return jsonify({
-        'courses': [
-            {'day': c.day_of_week, 'period': c.period, 'term': c.term, 'name': c.course_name} 
-            for c in courses
-        ],
-        'periods': [
-            {'term': p.term_name, 'start': p.start_date.isoformat(), 'end': p.end_date.isoformat()} 
-            for p in periods
-        ],
-        'period_times': {
-            pt.period: {'start': pt.start_time, 'end': pt.end_time} 
-            for pt in pt_data
-        }
+        'courses': [{'day': c.day_of_week, 'period': c.period, 'term': c.term, 'name': c.course_name} for c in courses],
+        'periods': [{'term': p.term_name, 'start': p.start_date.isoformat(), 'end': p.end_date.isoformat()} for p in periods],
+        'period_times': {pt.period: {'start': pt.start_time, 'end': pt.end_time} for pt in pt_data},
+        # ★ 追加：整理した休日と振替日を送る
+        'holidays': holidays,
+        'substitute_days': substitute_days
     })
 #---------------------------------------------------------------------#
 
