@@ -108,6 +108,8 @@ class MemoryLog(db.Model):
     title = db.Column(db.String(100))
     category = db.Column(db.String(50))
     status = db.Column(db.String(20))
+    content = db.Column(db.Text)          # 新規追加：内容・メモ
+    image_filename = db.Column(db.String(200)) # 新規追加：画像ファイル名
     # 誰のデータか保存する箱（Userモデルと紐付け）
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -761,6 +763,7 @@ def save_log():
         title=request.form.get('title'),
         category=request.form.get('category'),
         status=request.form.get('status'),
+        content=request.form.get('content'),  # 追加
         user_id=current_user.id
     )
     db.session.add(new_log)
@@ -811,6 +814,7 @@ def edit_log(id):
         log.title = request.form.get('title')
         log.category = request.form.get('category')
         log.status = request.form.get('status')
+        log.content = request.form.get('content') # 追加
         db.session.commit()
         return redirect(url_for('show_list'))
     return render_template('edit-log.html', log=log)
