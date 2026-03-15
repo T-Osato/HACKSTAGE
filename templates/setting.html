@@ -29,6 +29,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="{{url_for('course_settings')}}" class="link-item">
+                            <span>授業予定の入力</span>
+                            <i class="arrow"></i>
+                        </a>
+                    </li>
+                    <li>
                         <a href="https://moodle5.osaka-kyoiku.ac.jp/2026/" class="link-item">
                             <span>moodle</span>
                             <i class="icon-external"></i>
@@ -44,7 +50,7 @@
                     {% if user.role == 'admin' %}
                     <li>
                         <a href="{{ url_for('admin_users') }}" class="link-item admin-btn">
-                            <span>管理者権限ページ（ユーザー管理）</span>
+                            <span>管理者権限ページ</span>
                         </a>
                     </li>
                     {% endif %}

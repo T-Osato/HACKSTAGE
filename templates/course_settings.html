@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>時間割・ターム設定 | キャンパスツール</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_style.css') }}">
+    <style>
+        .timetable-table { width: 100%; border-spacing: 5px; border-collapse: separate; table-layout: fixed; margin-bottom: 20px; }
+        .timetable-table th { background: #f1f5f9; color: #475569; padding: 8px; font-size: 0.75rem; border-radius: 4px; }
+        .period-num { background: #f8fafc; font-weight: bold; color: #64748b; font-size: 0.8rem; text-align: center; border-radius: 4px; width: 35px; }
+        .course-cell { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; }
+        .timetable-input { width: 100%; padding: 6px; border: 1px solid #edf2f7; border-radius: 4px; font-size: 0.8rem; box-sizing: border-box; }
+        
+        .section-title { font-size: 1rem; color: #2d3748; margin: 30px 0 15px; display: flex; align-items: center; font-weight: bold; border-bottom: 2px solid #edf2f7; padding-bottom: 8px; }
+        .term-date-row { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #edf2f7; }
+        .time-box { background: #f0fff4; padding: 10px; border-radius: 8px; border: 1px solid #c6f6d5; flex: 1; min-width: 140px; }
+    </style>
+</head>
+<body>
+    {% include 'header.html' %}
+
+    <main class="main" style="flex-direction: column; align-items: center; padding-top: 80px;">
+        <div class="admin-section" style="width: 100%; max-width: 1000px;">
+            <div class="modal-header-container">
+                <h2 id="modal-title-text" style="border-left: 5px solid #3182ce;">授業予定・詳細設定</h2>
+            </div>
+
+            <div class="admin-form" style="padding: 25px;">
+                <form action="{{ url_for('course_settings') }}" method="POST">
+                    
+                    <div style="display: flex; gap: 15px; margin-bottom: 25px; background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: flex-end;">
+                        <div style="flex: 1;">
+                            <label style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 6px; display: block;">対象年度</label>
+                            <select name="year" id="year-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <option value="2025">2025年度</option>
+                                <option value="2026" selected>2026年度</option>
+                                <option value="2027">2027年度</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1.5;">
+                            <label style="font-size: 0.8rem; font-weight: bold; color: #64748b; margin-bottom: 6px; display: block;">セメスター</label>
+                            <select name="semester" id="semester-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <option value="Spring">春セメスター (T1 / T2)</option>
+                                <option value="Fall">秋セメスター (T3 / T4)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <table class="timetable-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                {% for day in ['月', '火', '水', '木', '金'] %}<th>{{ day }}</th>{% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in range(1, 6) %}
+                            <tr>
+                                <td class="period-num">{{ p }}</td>
+                                {% for d in ['mon', 'tue', 'wed', 'thu', 'fri'] %}
+                                <td class="course-cell">
+                                    <label style="font-size: 0.6rem; display: flex; align-items: center; margin-bottom: 4px; cursor: pointer; color: #718096;">
+                                        <input type="checkbox" class="semester-check" data-target="{{ d }}-{{ p }}" style="width: auto; margin-right: 4px;"> セメ科目
+                                    </label>
+                                    <input type="text" name="{{ d }}_{{ p }}_t1" class="timetable-input t1-input-{{ d }}-{{ p }}" placeholder="前ターム">
+                                    <div id="group-t2-{{ d }}-{{ p }}" style="margin-top: 4px;">
+                                        <input type="text" name="{{ d }}_{{ p }}_t2" class="timetable-input t2-input-{{ d }}-{{ p }}" placeholder="後ターム">
+                                    </div>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="section-title"><span style="color:#3182ce; margin-right:8px;">📅</span> ターム日程の設定</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        {% for t in ['T1', 'T2', 'T3', 'T4'] %}
+                        <div class="term-date-row">
+                            <label style="width:30px; font-weight:bold;">{{ t }}</label>
+                            <input type="date" name="{{ t }}_start" id="{{ t }}_start" class="timetable-input" style="padding:5px;">
+                            <span>-</span>
+                            <input type="date" name="{{ t }}_end" id="{{ t }}_end" class="timetable-input" style="padding:5px;">
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="section-title"><span style="color:#48bb78; margin-right:8px;">⏰</span> 各時限の標準時間</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {% for p in range(1, 6) %}
+                        <div class="time-box">
+                            <label style="font-size: 0.75rem; font-weight:bold; color:#2f855a;">{{ p }}限</label>
+                            <div style="display: flex; gap: 4px; margin-top: 4px;">
+                                <input type="text" name="p{{ p }}_start" id="p{{ p }}_start" placeholder="09:00" class="timetable-input" style="padding:4px; font-size:0.75rem;">
+                                <input type="text" name="p{{ p }}_end" id="p{{ p }}_end" placeholder="10:30" class="timetable-input" style="padding:4px; font-size:0.75rem;">
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div style="margin-top: 40px; display: flex; justify-content: flex-end; gap: 15px;">
+                        <a href="{{ url_for('settings') }}" class="btn-secondary" style="text-decoration: none; padding: 12px 25px; border-radius: 6px;">キャンセル</a>
+                        <button type="submit" class="admin-submit-btn" style="margin: 0; padding: 12px 60px;">設定をすべて保存する</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. セメスター科目同期 ---
+        document.querySelectorAll('.semester-check').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const tid = this.getAttribute('data-target');
+                const t1 = document.querySelector(`.t1-input-${tid}`);
+                const t2 = document.querySelector(`.t2-input-${tid}`);
+                const g2 = document.getElementById(`group-t2-${tid}`);
+                if (this.checked) {
+                    g2.style.opacity = "0.3"; t2.style.pointerEvents = "none";
+                    t2.value = t1.value;
+                    t1.oninput = () => { if(this.checked) t2.value = t1.value; };
+                } else {
+                    g2.style.opacity = "1"; t2.style.pointerEvents = "auto";
+                    t1.oninput = null;
+                }
+            });
+        });
+
+        // --- 2. データ自動ロード ---
+        async function loadAllData() {
+            const year = document.getElementById('year-select').value;
+            const semester = document.getElementById('semester-select').value;
+            
+            document.querySelectorAll('.timetable-input').forEach(i => i.value = "");
+            document.querySelectorAll('.semester-check').forEach(c => c.checked = false);
+
+            try {
+                const response = await fetch(`/api/get_timetable?year=${year}&semester=${semester}`);
+                const data = await response.json();
+
+                // 授業反映
+                data.courses.forEach(c => {
+                    const isFirst = (c.term === 'T1' || c.term === 'T3');
+                    const input = document.querySelector(`.t${isFirst ? '1' : '2'}-input-${c.day}-${c.period}`);
+                    if (input) input.value = c.name;
+                });
+
+                // 日程反映
+                for (const [t, range] of Object.entries(data.periods)) {
+                    if (document.getElementById(`${t}_start`)) document.getElementById(`${t}_start`).value = range.start;
+                    if (document.getElementById(`${t}_end`)) document.getElementById(`${t}_end`).value = range.end;
+                }
+
+                // 標準時間反映
+                for (const [p, times] of Object.entries(data.period_times)) {
+                    if (document.getElementById(`p${p}_start`)) document.getElementById(`p${p}_start`).value = times.start;
+                    if (document.getElementById(`p${p}_end`)) document.getElementById(`p${p}_end`).value = times.end;
+                }
+
+                // セメ科目判定
+                const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+                days.forEach(d => {
+                    for(let p=1; p<=5; p++) {
+                        const v1 = document.querySelector(`.t1-input-${d}-${p}`).value;
+                        const v2 = document.querySelector(`.t2-input-${d}-${p}`).value;
+                        if (v1 !== "" && v1 === v2) {
+                            const c = document.querySelector(`.semester-check[data-target="${d}-${p}"]`);
+                            if(c) { c.checked = true; c.dispatchEvent(new Event('change')); }
+                        }
+                    }
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById('year-select').addEventListener('change', loadAllData);
+        document.getElementById('semester-select').addEventListener('change', loadAllData);
+        window.addEventListener('DOMContentLoaded', loadAllData);
+    </script>
+</body>
+</html>

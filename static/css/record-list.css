@@ -1,0 +1,174 @@
+:root {
+    --primary-color: #4da6ff;
+    --hover-color: #1c8cff;
+    --bg-color: #f8fbff;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    margin: 0;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    padding-top: 100px;
+}
+
+h1 {
+    font-size: 26px;
+    color: #2c5282;
+    border-left: 6px solid var(--primary-color);
+    padding-left: 15px;
+}
+
+/* グリッド配置はそのまま維持 */
+.log-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+/* カード：カレンダーのモーダルと同じ質感 */
+.log-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px; /* 16pxに統一 */
+    padding: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    animation: modalFade 0.5s ease;
+}
+
+@keyframes modalFade {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.log-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-color);
+    box-shadow: 0 15px 30px rgba(77, 166, 255, 0.15);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 10px;
+}
+
+.category-tag {
+    background: #cfeeff;
+    color: #2b6cb0;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.log-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 10px 0;
+}
+
+.log-title a {
+    text-decoration: none;
+    color: #2d3748;
+}
+
+/* 削除ボタン：設定画面のdangerスタイル */
+.delete-btn {
+    color: #c53030;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #fed7d7;
+    background-color: #fff5f5;
+    padding: 5px 12px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.delete-btn:hover {
+    background-color: #feb2b2;
+    color: #9b2c2c;
+}
+
+.card-footer {
+    margin-top: 15px;
+    text-align: right;
+}
+
+/* 検索バー全体の囲み */
+.filter-nav {
+    margin: 20px auto;
+    max-width: 900px; /* カードの幅に合わせる */
+    padding: 0 10px;
+}
+
+/* フォームの中身を横並びにして整列 */
+.filter-form {
+    display: flex;
+    flex-wrap: wrap; /* 画面が狭いときは自動で折り返す */
+    gap: 10px;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* ほんのり影をつけて浮かせる */
+    align-items: center;
+}
+
+/* セレクトボックス（カテゴリー・ステータス共通） */
+.filter-form select {
+    flex: 1; /* 横幅を均等に広げる */
+    min-width: 150px; /* 狭くなりすぎないように */
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: #f8fafc;
+    font-size: 14px;
+    color: #4a5568;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.filter-form select:focus {
+    border-color: #4da6ff;
+}
+
+/* 絞り込むボタン */
+.filter-btn {
+    background: #4da6ff;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap; /* ボタン内の文字を改行させない */
+}
+
+.filter-btn:hover {
+    background: #1c8cff;
+}
+
+/* 解除リンク */
+.reset-link {
+    color: #a0aec0;
+    text-decoration: none;
+    font-size: 14px;
+    margin-left: 5px;
+    white-space: nowrap;
+}
+
+.reset-link:hover {
+    text-decoration: underline;
+}
