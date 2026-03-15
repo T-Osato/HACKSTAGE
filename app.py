@@ -32,6 +32,8 @@ login_manager.login_view = 'login'
 
 #---------------------------------------------------------------------#
 
+#---------------------------------------------------------------------#
+
 #ユーザーモデルの作成
 class User(UserMixin,db.Model):
     #ID(内部管理用)
@@ -52,6 +54,7 @@ class User(UserMixin,db.Model):
     #サーバー内での権限('admin','user')
     role = db.Column(db.String(20),default = 'user')
 
+<<<<<<< HEAD
 #学年暦モデル
 class AcademicCalendar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,6 +70,8 @@ class CourseEvent(db.Model):
     event_date = db.Column(db.Date, nullable=False) # 日付
     event_time = db.Column(db.String(50))           # 時間（"13:00" や "未定" など自由入力）
     detail = db.Column(db.Text, nullable=False)      # 予定の詳細内容
+=======
+>>>>>>> feature/record-page
 
 # --- 既存の User クラスはそのまま ---
 
@@ -98,6 +103,16 @@ class Comment(db.Model):
     # リレーションシップ
     thread = db.relationship('Thread', backref=db.backref('comments', lazy=True))
     author = db.relationship('User', backref=db.backref('comments', lazy=True))
+
+# 個人のメモ（Memory Log）モデルを追加
+class MemoryLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(20))
+    title = db.Column(db.String(100))
+    category = db.Column(db.String(50))
+    status = db.Column(db.String(20))
+    # 誰のデータか保存する箱（Userモデルと紐付け）
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
 class UserCourse(db.Model):
@@ -328,6 +343,7 @@ def setting():
 def change_password():
     return render_template("change-password.html",user=current_user)
 
+<<<<<<< HEAD
 #---------------------------------------------------------------------#
 
 @app.route("/reset", methods=['GET', 'POST'])
@@ -337,6 +353,8 @@ def reset():
         flash("パスワードリセット用のメールを送信しました（モック）")
         return redirect(url_for('login'))
     return render_template("reset.html")
+=======
+>>>>>>> feature/record-page
 
 #---------------------------------------------------------------------#
 
@@ -712,6 +730,73 @@ def calendar_data():
 
 with app.app_context():
     db.create_all()
+
+@app.route('/record')
+@login_required
+def record_page():
+    return render_template('record-page.html')
+
+@app.route('/save', methods=['POST'])
+@login_required
+def save_log():
+    new_log = MemoryLog(
+        date=request.form.get('date'),
+        title=request.form.get('title'),
+        category=request.form.get('category'),
+        status=request.form.get('status'),
+        user_id=current_user.id
+    )
+    db.session.add(new_log)
+    db.session.commit()
+    # 保存が終わったら一覧画面に
+    return redirect(url_for('show_list'))
+
+@app.route('/list')
+def show_list():
+    # 両方のフィルター値を取得
+    category_filter = request.args.get('category_filter')
+    status_filter = request.args.get('status_filter')
+
+    # まずは全件取得のクエリ（命令）を準備
+    query = MemoryLog.query
+
+    # カテゴリーが選ばれていたら条件を追加
+    if category_filter:
+        query = query.filter_by(category=category_filter)
+    
+    # ステータスが選ばれていたらさらに条件を追加
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+
+    # 最後にデータを取得（新しい順にするなら .order_by(MemoryLog.id.desc()) を足すと良いです）
+    logs = query.all()
+    
+    return render_template('record-list.html', logs=logs)
+    
+@app.route('/delete-log/<int:id>')
+@login_required
+def delete_log(id):
+    log = MemoryLog.query.get_or_404(id)
+    if log.user_id != current_user.id:
+        abort(403)
+    db.session.delete(log)
+    db.session.commit()
+    return redirect(url_for('show_list'))
+
+@app.route('/edit-log/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_log(id):
+    log = MemoryLog.query.get_or_404(id)
+    if log.user_id != current_user.id:
+        abort(403)
+    if request.method == 'POST':
+        log.date = request.form.get('date')
+        log.title = request.form.get('title')
+        log.category = request.form.get('category')
+        log.status = request.form.get('status')
+        db.session.commit()
+        return redirect(url_for('show_list'))
+    return render_template('edit-log.html', log=log)
 
 if __name__  == "__main__":
     app.run(debug=True)               
