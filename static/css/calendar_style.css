@@ -59,11 +59,18 @@
 
 /* 入力欄 */
 .modal-content input[type="text"],
-.modal-content input[type="time"] {
+.modal-content input[type="time"],
+.modal-content textarea {
     padding: 8px 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     transition: 0.2s;
+    font-family: inherit;
+}
+
+.modal-content textarea {
+    resize: vertical;
+    min-height: 60px;
 }
 
 /*カラー*/

@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!calendarEl) return; 
 
     let localEvents = JSON.parse(localStorage.getItem("events")) || [];
-    const adminEventsData = typeof adminEvents !== 'undefined' ? adminEvents : [];
+    
+    // HTMLのdata属性から管理者イベントデータを取得
+    const adminEventsEl = document.getElementById('admin-events-data');
+    const adminEventsData = adminEventsEl ? JSON.parse(adminEventsEl.dataset.events || "[]") : [];
     const modal = document.getElementById("event-modal");
     let editingEventId = null;
 
@@ -35,14 +38,17 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // --- データの読み込みロジック ---
         events: async function(info, successCallback, failureCallback) {
-            let safeLocalEvents = localEvents.map(e => {
+            let safeLocalEvents = localEvents.map((e, idx) => {
                 if (!e.date || e.date.trim() === "") return null;
+                // もしIDがなければ、この場で一時的なIDを振る（一時的だが、削除・更新のフックにはなる）
+                if (!e.id) e.id = "temp_" + idx; 
+
                 const hasTime = e.startTime && e.startTime.includes(':');
                 const startISO = hasTime ? `${e.date}T${e.startTime}:00` : e.date;
                 const endISO = (hasTime && e.endTime) ? `${e.date}T${e.endTime}:00` : null;
                 return {
-                    id: e.id, title: e.title, start: startISO, end: endISO, allDay: !hasTime, color: e.color,
-                    extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true }
+                    id: String(e.id), title: e.title, start: startISO, end: endISO, allDay: !hasTime, color: e.color,
+                    extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true, originalId: e.id }
                 };
             }).filter(e => e !== null);
 
@@ -185,7 +191,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function openModalForDetail(event) {
-        editingEventId = event.id;
+        // FullCalendarのevent.idは文字列として取得される
+        editingEventId = event.id || event.extendedProps.originalId;
         const isLocal = event.extendedProps.isLocal;
         resetModalFields();
 
@@ -225,9 +232,23 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     document.getElementById("delete-event").onclick = function() {
-        if (!editingEventId) return;
+        if (!editingEventId) {
+            alert("この予定は削除できません（IDが見つかりません）");
+            return;
+        }
         if (confirm("この予定を削除しますか？")) {
-            localEvents = localEvents.filter(e => e.id !== editingEventId);
+            // IDでフィルタリング。文字列として比較することで確実にマッチさせる
+            const beforeCount = localEvents.length;
+            localEvents = localEvents.filter(e => String(e.id) !== String(editingEventId));
+            
+            if (localEvents.length === beforeCount) {
+                // もしIDで消せなかった場合のバックアップ（同じ名前と日付で消す）
+                // ただし、これは最終手段
+                const title = document.getElementById("event-title").value;
+                const date = document.getElementById("event-date").value;
+                localEvents = localEvents.filter(e => !(e.title === title && e.date === date));
+            }
+
             saveAndRefresh();
         }
     };

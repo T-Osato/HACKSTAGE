@@ -30,35 +30,43 @@
 .modal {
     position: fixed;
     inset: 0;
-    background-color: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(3px);
+    background: rgba(0, 0, 0, 0.35);
     display: none;
     justify-content: center;
     align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s;
     z-index: 2000;
 }
 
-.modal.show { display: flex; }
+.modal.show { 
+    display: flex; 
+    opacity: 1;
+    visibility: visible;
+}
 
-/* モーダル本体（スリム化：横幅380px） */
+/* モーダル本体 */
 .modal-content {
-    background: white;
-    border-radius: 12px;
-    width: 95%;
-    max-width: 380px; 
+    width: 380px;
+    padding: 0; /* ヘッダーがあるので0にし、中身で調整 */
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
-    animation: modalPop 0.25s ease-out;
+    animation: modalPop 0.3s ease;
 }
 
 #modal-title-text {
     margin: 0;
     padding: 15px 20px;
     font-size: 1.1rem;
-    color: #2d3748;
-    background: #f8fafc;
-    border-bottom: 1px solid #edf2f7;
-    border-left: 5px solid #3182ce; 
+    color: #333;
+    background: rgba(248, 250, 252, 0.5);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    text-align: center;
+    font-weight: bold;
 }
 
 /* フォーム調整 */
@@ -77,17 +85,18 @@
 .admin-form input, .admin-form textarea, .admin-form select {
     width: 100%;
     padding: 8px 10px;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
     font-size: 0.9rem;
     box-sizing: border-box;
     transition: 0.2s;
+    background: white;
 }
 
 .admin-form input:focus, .admin-form textarea:focus {
-    border-color: #3182ce;
-    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
     outline: none;
+    border-color: #4da6ff;
+    box-shadow: 0 0 5px rgba(77, 166, 255, 0.5);
 }
 
 .time-grid { display: flex; gap: 12px; }
@@ -97,7 +106,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #f1f5f9;
+    background: rgba(241, 245, 249, 0.5);
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -126,22 +135,30 @@
 }
 
 .admin-submit-btn {
-    background: #3182ce;
+    background: #4da6ff;
     color: white;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 8px 15px;
+    border-radius: 8px;
     font-weight: bold;
     cursor: pointer;
 }
 
+.admin-submit-btn:hover {
+    background: #1c8cff;
+}
+
 .btn-secondary {
-    background: #edf2f7;
-    color: #4a5568;
+    background: #eee;
+    color: #333;
     border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 8px 15px;
+    border-radius: 8px;
     cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #ddd;
 }
 
 .delete-btn-admin {
