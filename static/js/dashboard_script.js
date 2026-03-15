@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById("event-modal");
     let editingEventId = null;
 
-    // ★ 修正点1: カレンダーの表示モードを安全に記録しておく変数
+    // カレンダーの表示モードを安全に記録しておく変数
     let currentViewType = 'dayGridMonth';
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         customButtons: { addEventButton: { text: '＋ 予定を追加', click: () => openModalForAdd() } },
         
-        // ★ 修正点2: 表示モードが切り替わった時に変数を更新して再描画
+        // 表示モードが切り替わった時に変数を更新して再描画
         datesSet: function(info) {
             if (info.view.type !== currentViewType) {
                 currentViewType = info.view.type;
@@ -47,10 +47,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             }).filter(e => e !== null);
 
-            // ★ B. 管理者の予定フィルター (12時アップ増殖バグをここで防ぐ！)
+            // B. 管理者の予定フィルター (12時アップ増殖バグをここで防ぐ！)
             let safeAdminEvents = adminEventsData.map(e => {
                 if (!e) return null;
-                // 日付がなく時間だけ ("T12:00:00") のデータは全日程に増殖するため除外！
                 if (e.start && typeof e.start === 'string' && e.start.startsWith('T')) return null;
                 if (!e.start && !e.date) return null; 
                 return e;
@@ -63,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!response.ok) throw new Error(`API通信エラー`);
                 const data = await response.json();
 
-                // ★ 修正点3: 安全な変数を使って月表示かどうかを判定（これでクラッシュしません！）
+                // 安全な変数を使って月表示かどうかを判定
                 const isMonthView = (currentViewType === 'dayGridMonth');
 
                 let checkDate = new Date(info.start);
@@ -82,14 +81,33 @@ document.addEventListener('DOMContentLoaded', function () {
                         dayKey = data.substitute_days[dateStr]; 
                         isSubstitute = true;
                         subDayName = { 'mon': '月', 'tue': '火', 'wed': '水', 'thu': '木', 'fri': '金' }[dayKey];
+                        
+                        // ★追加: 授業の有無に関係なく全員に「振替日」のバッジを表示！
+                        allEvents.push({
+                            title: `🔄 ${subDayName}曜授業の振替日`,
+                            start: dateStr,
+                            allDay: true,
+                            color: '#f59e0b', // 目立つオレンジ
+                            extendedProps: { description: `この日は${subDayName}曜日の授業スケジュールになります。`, isLocal: false }
+                        });
                     }
 
                     // ② 休日の判定（振替日は優先する）
                     if (data.holidays && data.holidays.includes(dateStr) && !isSubstitute) {
                         dayKey = null; 
+                        
+                        // ★追加: 授業の有無に関係なく全員に「休日」のバッジを表示！
+                        allEvents.push({
+                            title: `🎌 休講日・祝日`,
+                            start: dateStr,
+                            allDay: true,
+                            color: '#ef4444', // 休みと分かる赤色
+                            extendedProps: { description: `授業はお休みです。`, isLocal: false }
+                        });
                     }
                     // ----------------------------
 
+                    // ③ 授業がある日の処理
                     if (dayKey) {
                         const currentTerm = data.periods.find(p => dateStr >= p.start && dateStr <= p.end);
 
@@ -118,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                         const eventTitle = isSubstitute ? `${c.period}限(振替): ${c.name}` : `${c.period}限: ${c.name}`;
                                         allEvents.push({
                                             title: eventTitle, start: `${dateStr}T${time.start}:00`, end: `${dateStr}T${time.end}:00`,
-                                            allDay: false, // ★これを入れないと時間軸に反映されません
+                                            allDay: false, 
                                             color: isSubstitute ? '#fef3c7' : '#e2e8f0', 
                                             textColor: isSubstitute ? '#b45309' : '#475569', 
                                             borderColor: isSubstitute ? '#fcd34d' : '#cbd5e1',
@@ -153,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 openCourseDetailModal(info.event);
                 return;
             }
+            // 休日・振替日のバッジや、通常の予定をクリックした時の処理
             openModalForDetail(info.event);
         }
     });
@@ -200,6 +219,8 @@ document.addEventListener('DOMContentLoaded', function () {
         editingEventId = event.id;
         const isLocal = event.extendedProps.isLocal;
         resetModalFields();
+        
+        // ローカル(自分で作った)予定なら「編集」、システム配信の予定(休日など)なら「詳細」
         document.getElementById("modal-title-text").textContent = isLocal ? "予定の詳細・編集" : "予定の詳細";
         document.getElementById("event-title").value = event.title;
         document.getElementById("event-date").value = event.startStr.split("T")[0];
@@ -207,8 +228,11 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById("event-end-time").value = event.extendedProps.endTime || "";
         document.getElementById("event-description").value = event.extendedProps.description || "";
         document.getElementById("event-color").value = event.backgroundColor || "#4da6ff";
+        
+        // 閲覧専用のイベント（休日など）は保存・削除ボタンを隠す
         document.getElementById("delete-event").style.display = isLocal ? "inline-block" : "none";
         document.getElementById("save-event").style.display = isLocal ? "inline-block" : "none";
+        
         modal.classList.add("show");
     }
 

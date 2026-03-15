@@ -38,7 +38,9 @@
             <div class="glass-box">
                 <h4>このスレッドに返信する</h4>
                 <form action="{{ url_for('thread_detail', thread_id=thread.id) }}" method="POST">
-                    <textarea name="content" placeholder="返信内容を入力してください" rows="3" required></textarea>
+                    <div class="input-group">
+                        <textarea name="content" placeholder="返信内容を入力してください" rows="3" required></textarea>
+                    </div>
                     <button type="submit" class="post-btn">返信を投稿</button>
                 </form>
             </div>

@@ -727,8 +727,9 @@ def get_timetable():
 def calendar_data():
     # 1. 授業とターム・時限の取得
     courses = UserCourse.query.filter_by(user_id=current_user.id).all()
-    periods = TermPeriod.query.filter_by(user_id=current_user.id).all()
-    pt_data = PeriodTime.query.filter_by(user_id=current_user.id).all()
+
+    periods = TermPeriod.query.all()
+    pt_data = PeriodTime.query.all()
 
     # ★ 2. academic_calendar から休日・振替日を取得
     # 全ユーザー共通のデータだと思うので、user_idの絞り込みは外しています
