@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>record-list</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/record-list.css')}}">
+</head>
+<body>
+    <header>
+        <h1>My Memory Log</h1>
+        <nav class="main-nav">
+            <a href="{{ url_for('record_page') }}">新しく記録する</a>
+        </nav>
+    </header>
+
+    <main>
+        <nav class="filter-nav">
+            <form action="{{ url_for('show_list') }}" method="GET" class="filter-form">
+                <select name="category_filter" id="category_filter">
+                    <option value="">すべて</option>
+                    <option value="place">場所</option>
+                    <option value="food">食べ物</option>
+                    <option value="book">本</option>
+                    <option value="movie">映画</option>
+                    <option value="other">その他</option>
+                </select>
+
+                <select name="status_filter" id="status_filter">
+                    <option value="">すべて</option>
+                    <option value="wish">⭐ Wish</option>
+                    <option value="done">✅ Done</option>
+                </select>
+                <button type="submit" class="filter-btn">絞り込む</button>
+            <a href="{{ url_for('show_list') }}" class="reset-link">解除</a>
+            </form>
+        </nav>
+
+        <div class="log-container">
+            {% for log in logs %}
+            <article class="log-card">
+                <div class="card-header">
+                    <span class="log-date">{{ log.date }}</span>
+                    <span class="badge status-{{ log.status | lower }}">
+                        {% if log.status == 'wish' %}
+                            ⭐Wish
+                        {% elif log.status == 'done' %}
+                            ✅Done
+                        {% else %}
+                            {{ log.status }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h2 class="log-title">{{ log.title }}</h2>
+                    <p class="category-tag">{{ log.category }}</p>
+        
+                    <div class="card-footer">
+                        <a href="{{ url_for('edit_log', id=log.id) }}" class="edit-btn">編集</a>
+                        <a href="{{ url_for('delete_log', id=log.id) }}" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</a>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

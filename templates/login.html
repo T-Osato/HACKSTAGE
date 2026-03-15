@@ -8,33 +8,19 @@
 </head>
 
 <body>
-<<<<<<< HEAD
-    <h1>ログインページ</h1>
-    <form action="{{url_for('login')}}" method="POST">
-        <div>
-           <label for="student_id">学籍番号</label>
-            <input type="text" name="student_id" required> 
-        </div>
-        
-        <div>
-            <label for="password">パスワード</label>
-            <input type="password" name="password" required>
-        </div>
-        
-        <div>
-            <input type="submit" value="ログイン">
-        </div>
-        
-    </form>
-
-    <form action="{{url_for('signup')}}">
-        <input type="submit" value="サインアップ">
-    </form>
-=======
     <div class="login-container">
         <div class="login-box">
             <h2>ICT教育コース掲示板</h2>
-            <form action="{{url_for('login')}}" method="post"> <!-- ここにサーバーのリンク先を代入してほしい -->
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-container">
+                    {% for message in messages %}
+                        <div class="flash-message">{{ message }}</div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            <form action="{{url_for('login')}}" method="post">
                 <div class="input-box">
                     <input type="text" name="student_id" placeholder="学籍番号">
                 </div>
@@ -43,13 +29,10 @@
                 </div>
                 <button type="submit">ログイン</button>
                 <br>
-                <a href="reset.html">パスワードを忘れた場合はこちら</a>
-                <br>
                 <a href="{{url_for('signup')}}">新規登録はこちら</a>
             </form>
         </div>
     </div>
->>>>>>> origin/login
 </body>
 
 </html>

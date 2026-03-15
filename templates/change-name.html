@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>名前の変更</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/change-password_style.css') }}">
+
+</head>
+
+<body>
+    {% include 'header.html' %}
+    <main class="main-content">
+        <div class="setting-container">
+            <h1>名前の変更</h1>
+            <div class="form-content">
+                <form action="/change-name" method="post">
+                    <ul class="form-list">
+                        <li>
+                            <label for="new-name">新しい名前</label>
+                            <input type="text" id="new-name" name="new_name" placeholder="新しい名前を入力" required>
+                        </li>
+                        <li>
+                            <button type="submit" class="submit-btn">名前を保存する</button>
+                        </li>
+                    </ul>
+                </form>
+            </div>
+            <a href="/setting" class="back-link">← 設定に戻る</a>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICT教育コース 掲示板</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/threads_style.css') }}">
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="main-container">
+        <h1>ICT掲示板</h1>
+
+        <section class="search-section" style="margin: 20px 0;">
+            <div class="glass-box">
+                <form action="{{ url_for('threads') }}" method="GET" style="display: flex; gap: 10px;">
+                    <input type="text" name="search" placeholder="キーワードで検索..." 
+                        value="{{ search_query }}" 
+                        style="flex: 1; padding: 10px; border-radius: 5px; border: none;">
+                    <button type="submit" class="post-btn" style="width: auto; padding: 0 20px;">検索</button>
+                    
+                    {% if search_query %}
+                        <a href="{{ url_for('threads') }}" 
+                        style="color: white; text-decoration: none; align-self: center; font-size: 0.8rem;">
+                        ✖ 解除
+                        </a>
+                    {% endif %}
+                </form>
+            </div>
+        </section>
+
+        <section class="create-thread-section">
+            <div class="glass-box">
+                <h3>新しいスレッドを立てる</h3>
+                <form action="{{ url_for('threads') }}" method="POST">
+                    <div class="input-group">
+                        <input type="text" name="title" placeholder="スレッドタイトル" required>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" name="tags" placeholder="タグ (例: Python, 課題相談)">
+                    </div>
+                    <div class="input-group">
+                        <textarea name="content" placeholder="本文を記入してください" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="post-btn">スレッドを作成</button>
+                </form>
+            </div>
+        </section>
+
+        <hr class="separator">
+
+        <section class="thread-list">
+            <h3 class="list-title">最新のスレッド</h3>
+            
+            {% for thread in threads %}
+                <div class="thread-block" onclick="location.href='{{ url_for('thread_detail', thread_id=thread.id) }}';">
+                    <div class="thread-header">
+                        {% if thread.tags %}
+                            <span class="tag-badge">{{ thread.tags }}</span>
+                        {% endif %}
+                        <span class="created-at">{{ thread.created_at.strftime('%Y/%m/%d %H:%M') }}</span>
+                    </div>
+                    
+                    <h2 class="thread-title">{{ thread.title }}</h2>
+                    
+                    <div class="thread-footer">
+                        <span class="author-info">
+                            スレ主: <strong>{{ thread.author.name }}</strong> 
+                            <small>({{ thread.author.student_id }})</small>
+                        </span>
+                    </div>
+                </div> {% else %}
+                <div class="glass-box empty-msg">
+                    <p>まだスレッドがありません。最初のスレッドを立ててみませんか？</p>
+                </div>
+            {% endfor %}
+        </section>
+        
+        <div class="navigation">
+            <a href="{{ url_for('dashboard') }}" class="back-link">← ダッシュボードに戻る</a>
+        </div>
+    </div>
+</body>
+</html>

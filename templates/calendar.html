@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar_style.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <title>カレンダー</title>
+</head>
+<!-- 予定追加ウィンドウ -->
+<div id="event-modal" class="modal">
+    <div class="modal-content">
+
+        <h2>予定追加</h2>
+
+        <label>予定名</label>
+        <input type="text" id="event-title">
+
+        <label>開始時間</label>
+        <input type="text" id="event-start-time">
+
+        <label>終了時間</label>
+        <input type="text" id="event-end-time">
+        <label><input type="checkbox" id="event-weekly"> 毎週繰り返す</label>
+
+        <label>カラー</label>
+        <select id="event-color" class="event-color">
+            <option value="#4da6ff">ブルー</option>
+            <option value="#ff4d4d">レッド</option>
+            <option value="#4dff88">グリーン</option>
+            <option value="#ffdb4d">イエロー</option>
+            <option value="#d44dff">パープル</option>
+        </select>
+
+        <div class="modal-buttons">
+            <button id="save-event" class="save-event">追加</button>
+            <button id="cancel-event" class="cancel-event">キャンセル</button>
+        </div>
+
+    </div>
+</div>
+<!--カレンダー本体-->
+
+<body>
+    {% include 'header.html' %}
+    <div class="main">
+        <div id="calendar" class="calendar">
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="{{ url_for('static', filename='js/calendar_script.js') }}"></script>
+</body>
+
+</html>

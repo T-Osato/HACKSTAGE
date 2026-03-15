@@ -1,0 +1,222 @@
+:root {
+    --primary-color: #4da6ff;
+    --secondary-color: #cfeeff;
+    --bg-color: #f8fbff;
+    --text-color: #333;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', Roboto, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+    margin: 0;
+    color: var(--text-color);
+}
+
+.main-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 95px 20px 40px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 共通タイトル */
+h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #2c5282;
+    border-left: 6px solid var(--primary-color);
+    padding-left: 15px;
+}
+
+/* グラスモーフィズム設定 */
+.glass-box {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(77, 166, 255, 0.2);
+    border-radius: 20px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 25px var(--shadow-color);
+}
+
+/* 検索セクション */
+.search-section .glass-box {
+    padding: 15px 20px;
+}
+
+.search-section input {
+    border: 1px solid #edf2f7 !important;
+    background: white !important;
+    color: #333 !important;
+    transition: 0.3s;
+}
+
+.search-section input:focus {
+    border-color: var(--primary-color) !important;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.2);
+}
+
+/* フォーム入力 */
+.input-group input,
+.input-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    border: 1px solid #edf2f7;
+    background: #fcfcfc;
+    font-size: 15px;
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.input-group input:focus,
+.input-group textarea:focus {
+    border-color: var(--primary-color);
+    background: white;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(77, 166, 255, 0.1);
+}
+
+/* ボタン */
+.post-btn {
+    background: linear-gradient(135deg, #4da6ff, #3182ce);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(77, 166, 255, 0.3);
+}
+
+.post-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(77, 166, 255, 0.4);
+    filter: brightness(1.05);
+}
+
+/* スレッド一覧 */
+.thread-list h3 {
+    font-size: 18px;
+    color: #718096;
+    margin: 30px 0 15px;
+    letter-spacing: 0.05em;
+}
+
+.thread-block {
+    background: white;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+}
+
+.thread-block:hover {
+    transform: translateX(5px);
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.thread-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.thread-title {
+    font-size: 1.2rem;
+    color: #2d3748;
+    margin: 0 0 10px 0;
+}
+
+.tag-badge {
+    background: #ebf8ff;
+    color: #3182ce;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.created-at {
+    font-size: 0.8rem;
+    color: #a0aec0;
+}
+
+.thread-footer {
+    border-top: 1px solid #f7fafc;
+    padding-top: 10px;
+    font-size: 0.9rem;
+    color: #718096;
+    display: flex;
+    justify-content: space-between;
+}
+
+/* 詳細ページ */
+.thread-main {
+    background: white;
+}
+
+.thread-body {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #4a5568;
+    margin: 25px 0;
+    white-space: pre-wrap;
+}
+
+.comment-block {
+    background: #f8fafc;
+    border-left: 4px solid var(--primary-color);
+}
+
+.comment-footer {
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.delete-btn {
+    background: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.delete-btn:hover {
+    background: #feb2b2;
+}
+
+.navigation .back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #3182ce;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.navigation .back-link:hover {
+    text-decoration: underline;
+}
