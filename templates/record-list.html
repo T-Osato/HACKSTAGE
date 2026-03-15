@@ -8,61 +8,77 @@
 </head>
 <body>
     {% include 'header.html' %}
-    <header>
-        <h1>My Memory Log</h1>
-        <nav class="main-nav">
-            <a href="{{ url_for('record_page') }}">新しく記録する</a>
-        </nav>
-    </header>
 
-    <main>
-        <nav class="filter-nav">
-            <form action="{{ url_for('show_list') }}" method="GET" class="filter-form">
-                <select name="category_filter" id="category_filter">
-                    <option value="">すべて</option>
-                    <option value="place">場所</option>
-                    <option value="food">食べ物</option>
-                    <option value="book">本</option>
-                    <option value="movie">映画</option>
-                    <option value="other">その他</option>
-                </select>
-
-                <select name="status_filter" id="status_filter">
-                    <option value="">すべて</option>
-                    <option value="wish">⭐ Wish</option>
-                    <option value="done">✅ Done</option>
-                </select>
-                <button type="submit" class="filter-btn">絞り込む</button>
-            <a href="{{ url_for('show_list') }}" class="reset-link">解除</a>
-            </form>
-        </nav>
-
-        <div class="log-container">
-            {% for log in logs %}
-            <article class="log-card">
-                <div class="card-header">
-                    <span class="log-date">{{ log.date }}</span>
-                    <span class="badge status-{{ log.status | lower }}">
-                        {% if log.status == 'wish' %}
-                            ⭐Wish
-                        {% elif log.status == 'done' %}
-                            ✅Done
-                        {% else %}
-                            {{ log.status }}
-                        {% endif %}
-                    </span>
+    <main class="main">
+        <div class="content-container">
+            <div class="page-header">
+                <div>
+                    <h1>My Memory Log</h1>
+                    <p class="subtitle">思い出や行きたい場所の記録</p>
                 </div>
-                <div class="card-body">
-                    <h2 class="log-title">{{ log.title }}</h2>
-                    <p class="category-tag">{{ log.category }}</p>
-        
+                <a href="{{ url_for('record_page') }}" class="add-btn">＋ 新しく記録する</a>
+            </div>
+
+            <nav class="filter-nav">
+                <form action="{{ url_for('show_list') }}" method="GET" class="filter-form">
+                    <div class="filter-group">
+                        <label>カテゴリー</label>
+                        <select name="category_filter" id="category_filter">
+                            <option value="">すべて</option>
+                            <option value="place">場所</option>
+                            <option value="food">食べ物</option>
+                            <option value="book">本</option>
+                            <option value="movie">映画</option>
+                            <option value="other">その他</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>ステータス</label>
+                        <select name="status_filter" id="status_filter">
+                            <option value="">すべて</option>
+                            <option value="wish">⭐ Wish</option>
+                            <option value="done">✅ Done</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="filter-btn">絞り込む</button>
+                        <a href="{{ url_for('show_list') }}" class="reset-link">解除</a>
+                    </div>
+                </form>
+            </nav>
+
+            <div class="log-container">
+                {% for log in logs %}
+                <article class="log-card">
+                    <div class="card-header">
+                        <span class="log-date">{{ log.date }}</span>
+                        <span class="badge status-{{ log.status | lower }}">
+                            {% if log.status == 'wish' %}
+                                ⭐Wish
+                            {% elif log.status == 'done' %}
+                                ✅Done
+                            {% else %}
+                                {{ log.status }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="card-content">
+                        <h2 class="log-title">{{ log.title }}</h2>
+                        <p class="category-tag">#{{ log.category }}</p>
+                    </div>
                     <div class="card-footer">
                         <a href="{{ url_for('edit_log', id=log.id) }}" class="edit-btn">編集</a>
                         <a href="{{ url_for('delete_log', id=log.id) }}" class="delete-btn" onclick="return confirm('本当に削除しますか？')">削除</a>
                     </div>
+                </article>
+                {% else %}
+                <div class="empty-state">
+                    <p>まだ記録がありません。新しい思い出を記録しましょう！</p>
                 </div>
-            </article>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
     </main>
 </body>
