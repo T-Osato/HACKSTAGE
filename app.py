@@ -112,6 +112,8 @@ class MemoryLog(db.Model):
     image_filename = db.Column(db.String(200)) # 新規追加：画像ファイル名
     # 誰のデータか保存する箱（Userモデルと紐付け）
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    author = db.relationship('User', backref=db.backref('memory_logs', lazy=True))
+    is_public = db.Column(db.Boolean, default=False)
 
 
 class UserCourse(db.Model):
@@ -781,6 +783,7 @@ def save_log():
         category=request.form.get('category'),
         status=request.form.get('status'),
         content=request.form.get('content'),  # 追加
+        is_public=request.form.get('is_public') == 'on',
         user_id=current_user.id
     )
     db.session.add(new_log)
@@ -793,9 +796,19 @@ def show_list():
     # 両方のフィルター値を取得
     category_filter = request.args.get('category_filter')
     status_filter = request.args.get('status_filter')
+    visibility_filter = request.args.get('visibility_filter', 'my_logs') # 追加
 
     # まずは全件取得のクエリ（命令）を準備
     query = MemoryLog.query
+
+    # 自分専用 or みんなの公開
+    if visibility_filter == 'public':
+        query = query.filter_by(is_public=True)
+    else:
+        # 未ログインの場合はログイン画面へ
+        if not current_user.is_authenticated:
+            return redirect(url_for('login'))
+        query = query.filter_by(user_id=current_user.id)
 
     # カテゴリーが選ばれていたら条件を追加
     if category_filter:
@@ -806,9 +819,9 @@ def show_list():
         query = query.filter_by(status=status_filter)
 
     # 最後にデータを取得（新しい順にするなら .order_by(MemoryLog.id.desc()) を足すと良いです）
-    logs = query.all()
+    logs = query.order_by(MemoryLog.id.desc()).all()
     
-    return render_template('record-list.html', logs=logs)
+    return render_template('record-list.html', logs=logs, visibility_filter=visibility_filter)
     
 @app.route('/delete-log/<int:id>')
 @login_required
@@ -832,6 +845,7 @@ def edit_log(id):
         log.category = request.form.get('category')
         log.status = request.form.get('status')
         log.content = request.form.get('content') # 追加
+        log.is_public = request.form.get('is_public') == 'on'
         db.session.commit()
         return redirect(url_for('show_list'))
     return render_template('edit-log.html', log=log)
