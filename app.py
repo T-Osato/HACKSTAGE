@@ -54,7 +54,6 @@ class User(UserMixin,db.Model):
     #サーバー内での権限('admin','user')
     role = db.Column(db.String(20),default = 'user')
 
-<<<<<<< HEAD
 #学年暦モデル
 class AcademicCalendar(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -70,8 +69,6 @@ class CourseEvent(db.Model):
     event_date = db.Column(db.Date, nullable=False) # 日付
     event_time = db.Column(db.String(50))           # 時間（"13:00" や "未定" など自由入力）
     detail = db.Column(db.Text, nullable=False)      # 予定の詳細内容
-=======
->>>>>>> feature/record-page
 
 # --- 既存の User クラスはそのまま ---
 
@@ -343,7 +340,6 @@ def setting():
 def change_password():
     return render_template("change-password.html",user=current_user)
 
-<<<<<<< HEAD
 #---------------------------------------------------------------------#
 
 @app.route("/reset", methods=['GET', 'POST'])
@@ -353,8 +349,6 @@ def reset():
         flash("パスワードリセット用のメールを送信しました（モック）")
         return redirect(url_for('login'))
     return render_template("reset.html")
-=======
->>>>>>> feature/record-page
 
 #---------------------------------------------------------------------#
 
