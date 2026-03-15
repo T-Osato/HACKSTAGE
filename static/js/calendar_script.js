@@ -36,18 +36,22 @@ document.addEventListener('DOMContentLoaded', function () {
         events: events.map(e => {
             if (e.isWeekly) {
                 return {
+                    id: String(e.id || ""),
                     title: e.title,
                     startTime: e.startTime,
                     endTime: e.endTime,
                     daysOfWeek: [e.dayOfWeek],
-                    color: e.color
+                    color: e.color,
+                    extendedProps: { description: e.description, isLocal: true, originalId: e.id }
                 };
             } else {
                 return {
+                    id: String(e.id || ""),
                     title: e.title,
                     start: e.date + "T" + e.startTime,
                     end: e.date + "T" + e.endTime,
-                    color: e.color
+                    color: e.color,
+                    extendedProps: { description: e.description, isLocal: true, originalId: e.id }
                 };
             }
         }),
@@ -64,8 +68,16 @@ document.addEventListener('DOMContentLoaded', function () {
             const titleInput = document.getElementById("event-title")
             const startInput = document.getElementById("event-start-time")
             const endInput = document.getElementById("event-end-time")
+            const descriptionInput = document.getElementById("event-description")
             const weeklyInput = document.getElementById("event-weekly")
             const colorInput = document.getElementById("event-color")
+
+            // 入力欄をリセット
+            if (titleInput) titleInput.value = "";
+            if (startInput) startInput.value = "";
+            if (endInput) endInput.value = "";
+            if (descriptionInput) descriptionInput.value = "";
+            if (weeklyInput) weeklyInput.checked = false;
 
             cancelBtn.onclick = function () {
                 modal.classList.remove("show")
@@ -76,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const title = titleInput.value
                 const startTime = startInput.value
                 const endTime = endInput.value
+                const description = descriptionInput ? descriptionInput.value : ""
 
                 if (!title) return alert("予定名を入力してください")
                 if (!startTime) return alert("開始時間を入力してください")
@@ -86,10 +99,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const color = colorInput.value
 
                 const newEvent = {
+                    id: "ev_" + Date.now(),
                     title: title,
                     date: info.dateStr,
                     startTime: startTime,
                     endTime: endTime,
+                    description: description,
                     isWeekly: isWeekly,
                     dayOfWeek: isWeekly ? new Date(info.dateStr).getDay() : null,
                     color: color
@@ -114,20 +129,30 @@ document.addEventListener('DOMContentLoaded', function () {
         // 予定クリック → 削除
         eventClick: function (info) {
 
-            const ok = confirm("予定を削除しますか？")
+            const eventId = info.event.id || info.event.extendedProps.originalId;
+            const title = info.event.title;
+            const description = info.event.extendedProps.description || "";
+            const date = info.event.startStr.split("T")[0];
+            const dayOfWeek = info.event.start.getDay();
+
+            let confirmMsg = `予定: ${title}\n`;
+            if (description) confirmMsg += `詳細: ${description}\n\n`;
+            confirmMsg += "この予定を削除しますか？";
+
+            const ok = confirm(confirmMsg);
             if (!ok) return
 
-            const title = info.event.title
-            const date = info.event.startStr.split("T")[0]
-            const dayOfWeek = info.event.start.getDay()
-
             events = events.filter(e => {
-                if (e.isWeekly) {
-                    return !(e.title === title && e.dayOfWeek === dayOfWeek)
-                } else {
-                    return !(e.title === title && e.date === date)
+                if (eventId && e.id) {
+                    return String(e.id) !== String(eventId);
                 }
-            })
+                // Fallback for old events without IDs
+                if (e.isWeekly) {
+                    return !(e.title === title && e.dayOfWeek === dayOfWeek);
+                } else {
+                    return !(e.title === title && e.date === date);
+                }
+            });
 
             localStorage.setItem("events", JSON.stringify(events))
             info.event.remove()

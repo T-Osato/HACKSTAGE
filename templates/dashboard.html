@@ -74,7 +74,9 @@
         </aside>
     </main>
 
-    <script>const adminEvents = {{ events_json | safe }};</script>
+    <!-- データをJavaScriptに渡すための隠し要素 -->
+    <div id="admin-events-data" data-events="{{ events_json | safe }}" style="display: none;"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="{{ url_for('static', filename='js/dashboard_script.js') }}"></script>

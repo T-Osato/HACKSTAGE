@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!calendarEl) return; 
 
     let localEvents = JSON.parse(localStorage.getItem("events")) || [];
-    const adminEventsData = typeof adminEvents !== 'undefined' ? adminEvents : [];
+    
+    // HTMLのdata属性から管理者イベントデータを取得
+    const adminEventsEl = document.getElementById('admin-events-data');
+    const adminEventsData = adminEventsEl ? JSON.parse(adminEventsEl.dataset.events || "[]") : [];
     const modal = document.getElementById("event-modal");
     let editingEventId = null;
 
@@ -35,14 +38,17 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // --- データの読み込みロジック ---
         events: async function(info, successCallback, failureCallback) {
-            let safeLocalEvents = localEvents.map(e => {
+            let safeLocalEvents = localEvents.map((e, idx) => {
                 if (!e.date || e.date.trim() === "") return null;
+                // もしIDがなければ、この場で一時的なIDを振る（一時的だが、削除・更新のフックにはなる）
+                if (!e.id) e.id = "temp_" + idx; 
+
                 const hasTime = e.startTime && e.startTime.includes(':');
                 const startISO = hasTime ? `${e.date}T${e.startTime}:00` : e.date;
                 const endISO = (hasTime && e.endTime) ? `${e.date}T${e.endTime}:00` : null;
                 return {
-                    id: e.id, title: e.title, start: startISO, end: endISO, allDay: !hasTime, color: e.color,
-                    extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true }
+                    id: String(e.id), title: e.title, start: startISO, end: endISO, allDay: !hasTime, color: e.color,
+                    extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true, originalId: e.id }
                 };
             }).filter(e => e !== null);
 
@@ -185,7 +191,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function openModalForDetail(event) {
-        editingEventId = event.id;
+        // FullCalendarのevent.idは文字列として取得される
+        editingEventId = event.id || event.extendedProps.originalId;
         const isLocal = event.extendedProps.isLocal;
         resetModalFields();
 
@@ -225,9 +232,23 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     document.getElementById("delete-event").onclick = function() {
-        if (!editingEventId) return;
+        if (!editingEventId) {
+            alert("この予定は削除できません（IDが見つかりません）");
+            return;
+        }
         if (confirm("この予定を削除しますか？")) {
-            localEvents = localEvents.filter(e => e.id !== editingEventId);
+            // IDでフィルタリング。文字列として比較することで確実にマッチさせる
+            const beforeCount = localEvents.length;
+            localEvents = localEvents.filter(e => String(e.id) !== String(editingEventId));
+            
+            if (localEvents.length === beforeCount) {
+                // もしIDで消せなかった場合のバックアップ（同じ名前と日付で消す）
+                // ただし、これは最終手段
+                const title = document.getElementById("event-title").value;
+                const date = document.getElementById("event-date").value;
+                localEvents = localEvents.filter(e => !(e.title === title && e.date === date));
+            }
+
             saveAndRefresh();
         }
     };
@@ -247,9 +268,80 @@ document.addEventListener('DOMContentLoaded', function () {
     function showTodaySchedule(allEvents) {
         const list = document.getElementById("today-schedule-list");
         if (!list) return;
+        
         const today = new Date().toLocaleDateString('sv-SE');
-        const items = allEvents.filter(e => (e.start ? e.start.split("T")[0] : e.date) === today && !e.extendedProps?.isCourseDetail);
-        list.innerHTML = items.length ? items.map(e => `<li class="task"><span style="background:${e.color || '#4da6ff'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>${e.extendedProps?.isCourseSummary ? '<strong>本日の授業予定</strong>' : e.title}</li>`).join('') : "<li>今日の予定はありません</li>";
+        
+        // 1. 今日の予定を抽出 (isCourseDetail は個別表示するか、まとめ表示するかで分かれる)
+        // ここでは、カレンダーの表示モードに関わらず「まとめ」があるならそれを優先し、
+        // 個別授業 (isCourseDetail) は、今日の予定リストでは「まとめ」がある場合は除外するなどの調整も可能ですが、
+        // シンプルに「isCourseDetail」以外を表示するようにします。
+        const items = allEvents.filter(e => {
+            const eventDate = e.start ? e.start.split("T")[0] : e.date;
+            return eventDate === today && !e.extendedProps?.isCourseDetail;
+        });
+
+        // 開始時間でソート（時間は昇順、終日は後ろ）
+        items.sort((a, b) => {
+            const getTime = (ev) => {
+                if (ev.extendedProps?.startTime) return ev.extendedProps.startTime;
+                // 管理者用 description に時間が入っている場合はそれを返す
+                if (ev.extendedProps?.description && ev.extendedProps.description.includes(':')) return ev.extendedProps.description;
+                if (ev.description && ev.description.includes(':')) return ev.description;
+                return "ZZ:ZZ"; // 終日は最後に
+            };
+            return getTime(a).localeCompare(getTime(b));
+        });
+
+        
+        if (items.length === 0) {
+            list.innerHTML = "<li style='color: #64748b; font-size: 0.85rem; padding: 10px;'>今日の予定はありません</li>";
+            return;
+        }
+
+        // 2. 表示用にHTMLを生成
+        list.innerHTML = items.map(e => {
+            const props = e.extendedProps || {};
+            const color = e.color || e.backgroundColor || '#4da6ff';
+            
+            // 時間の判定
+            let timeStr = "終日";
+            if (props.isCourseSummary) {
+                timeStr = "終日";
+            } else if (props.startTime) {
+                timeStr = props.startTime;
+                if (props.endTime) timeStr += ` - ${props.endTime}`;
+            } else if (props.description && props.description.includes(':')) {
+                // 管理者からの連絡など、description に時間が入っている場合
+                timeStr = props.description;
+            } else if (e.description && e.description.includes(':')) {
+                timeStr = e.description;
+            }
+
+            // タイトルと詳細
+            let title = e.title;
+            let description = props.description || "";
+
+            if (props.isCourseSummary) {
+                title = "📘 本日の授業予定";
+                description = props.details || "";
+            }
+
+            // 時間として使用した場合は、詳細欄には表示しない
+            if (description === timeStr) description = "";
+
+            return `
+                <li class="task">
+                    <div class="task-color-bar" style="background: ${color}"></div>
+                    <div class="task-content">
+                        <div class="task-header">
+                            <span class="task-time">${timeStr}</span>
+                            <span class="task-title">${title}</span>
+                        </div>
+                        ${description ? `<div class="task-description">${description.replace(/\n/g, '<br>')}</div>` : ''}
+                    </div>
+                </li>
+            `;
+        }).join('');
     }
 
     document.getElementById("cancel-event").onclick = () => modal.classList.remove("show");
