@@ -12,11 +12,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById("event-modal");
     let editingEventId = null;
 
-    // カレンダーの表示モードを安全に記録しておく変数
-    let currentViewType = 'dayGridMonth';
+    // カレンダーの表示開始日と表示モードを同期
+    let currentViewType = localStorage.getItem('calendarViewType') || 'dayGridMonth';
+    let initialDate = localStorage.getItem('calendarViewDate') || new Date().toISOString();
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: currentViewType,
+        initialDate: initialDate,
         locale: 'ja',
         height: 'auto',
         headerToolbar: { 
@@ -27,8 +29,10 @@ document.addEventListener('DOMContentLoaded', function () {
         dayMaxEvents: true, // 予定が多い場合に「＋他〇件」と表示する
         eventDisplay: 'block', // 予定をブロック表示にして見やすくする
         
-        // 表示モードが切り替わった時に変数を更新して再描画
+        // 表示モードや日付が切り替わった時に同期
         datesSet: function(info) {
+            localStorage.setItem('calendarViewType', info.view.type);
+            localStorage.setItem('calendarViewDate', info.view.currentStart.toISOString());
             if (info.view.type !== currentViewType) {
                 currentViewType = info.view.type;
                 calendar.refetchEvents();
@@ -39,14 +43,24 @@ document.addEventListener('DOMContentLoaded', function () {
         events: async function(info, successCallback, failureCallback) {
             // A. 個人の予定を安全に整形
             let safeLocalEvents = localEvents.map(e => {
-                if (!e.date || e.date.trim() === "") return null;
                 const hasTime = e.startTime && e.startTime.includes(':');
-                const startISO = hasTime ? `${e.date}T${e.startTime}:00` : e.date;
-                const endISO = (hasTime && e.endTime) ? `${e.date}T${e.endTime}:00` : null;
-                return {
-                    id: e.id, title: e.title, start: startISO, end: endISO, allDay: !hasTime, color: e.color,
-                    extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true }
-                };
+                if (e.isWeekly) {
+                    return {
+                        id: String(e.id || ""), title: e.title,
+                        startTime: e.startTime, endTime: e.endTime,
+                        daysOfWeek: [e.dayOfWeek], color: e.color,
+                        allDay: !hasTime,
+                        extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true, isWeekly: true, dayOfWeek: e.dayOfWeek }
+                    };
+                } else {
+                    if (!e.date || e.date.trim() === "") return null;
+                    const startISO = hasTime ? `${e.date}T${e.startTime}:00` : e.date;
+                    const endISO = (hasTime && e.endTime) ? `${e.date}T${e.endTime}:00` : null;
+                    return {
+                        id: String(e.id || ""), title: e.title, start: startISO, end: endISO, allDay: !hasTime, color: e.color,
+                        extendedProps: { description: e.description, startTime: e.startTime, endTime: e.endTime, isLocal: true, isWeekly: false }
+                    };
+                }
             }).filter(e => e !== null);
 
             // B. 管理者の予定フィルター (12時アップ増殖バグをここで防ぐ！)
@@ -219,6 +233,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById("event-end-time").value = event.extendedProps.endTime || "";
         document.getElementById("event-description").value = event.extendedProps.description || "";
         document.getElementById("event-color").value = event.backgroundColor || "#4da6ff";
+        document.getElementById("event-weekly").checked = event.extendedProps.isWeekly || false;
         
         // 閲覧専用のイベント（休日など）は保存・削除ボタンを隠す
         document.getElementById("delete-event").style.display = isLocal ? "inline-block" : "none";
@@ -237,7 +252,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const eventData = { 
             id: editingEventId || "ev_" + Date.now(), title: title, date: date, 
             startTime: document.getElementById("event-start-time").value, endTime: document.getElementById("event-end-time").value, 
-            description: document.getElementById("event-description").value, color: document.getElementById("event-color").value 
+            description: document.getElementById("event-description").value, color: document.getElementById("event-color").value,
+            isWeekly: document.getElementById("event-weekly").checked,
+            dayOfWeek: document.getElementById("event-weekly").checked ? new Date(date).getDay() : null
         };
 
         if (editingEventId) { 
@@ -266,23 +283,37 @@ document.addEventListener('DOMContentLoaded', function () {
         ["event-title", "event-date", "event-start-time", "event-end-time", "event-description"].forEach(id => {
             const el = document.getElementById(id); if(el) el.value = "";
         });
+        const weeklyCheck = document.getElementById("event-weekly");
+        if (weeklyCheck) weeklyCheck.checked = false;
+        const colorSelect = document.getElementById("event-color");
+        if (colorSelect) colorSelect.value = "#4da6ff";
     }
 
     function showTodaySchedule(allEvents) {
         const list = document.getElementById("today-schedule-list");
         if (!list) return;
 
-        const today = new Date().toLocaleDateString('sv-SE');
+        const todayDate = new Date();
+        const todayStr = todayDate.toLocaleDateString('sv-SE');
+        const todayDayOfWeek = todayDate.getDay();
 
         // 1. 当日のイベントをフィルタリング
         let items = allEvents.filter(e => {
+            // 毎週繰り返す予定の判定
+            if (e.daysOfWeek && e.daysOfWeek.includes(todayDayOfWeek)) {
+                return true;
+            }
+
+            // 通常の予定の判定
             let eventDate = "";
             if (e.start) {
                 eventDate = (typeof e.start === 'string') ? e.start.split("T")[0] : e.start.toLocaleDateString('sv-SE');
+            } else if (e.extendedProps && e.extendedProps.date) {
+                eventDate = e.extendedProps.date;
             } else {
                 eventDate = e.date;
             }
-            return eventDate === today;
+            return eventDate === todayStr;
         });
 
         // 授業の詳細（isCourseDetail）がある場合は、サマリー（isCourseSummary）を表示しない

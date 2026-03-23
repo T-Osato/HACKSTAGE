@@ -12,7 +12,10 @@
 <div id="event-modal" class="modal">
     <div class="modal-content">
 
-        <h2>予定追加</h2>
+        <h2 id="modal-title-text">予定追加</h2>
+
+        <label>日付</label>
+        <input type="date" id="event-date">
 
         <label>予定名</label>
         <input type="text" id="event-title">
@@ -38,6 +41,7 @@
         </select>
 
         <div class="modal-buttons">
+            <button id="delete-event" class="delete-event" style="display:none; background: #fff5f5; color: #e53e3e; border: 1px solid #feb2b2; padding: 10px; border-radius: 5px; cursor: pointer;">削除</button>
             <button id="cancel-event" class="cancel-event">キャンセル</button>
             <button id="save-event" class="save-event">追加</button>
         </div>
