@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
             right: 'addEventButton dayGridMonth,timeGridWeek,timeGridDay' 
         },
         customButtons: { addEventButton: { text: '＋ 予定を追加', click: () => openModalForAdd() } },
+        dayMaxEvents: true, // 予定が多い場合に「＋他〇件」と表示する
+        eventDisplay: 'block', // 予定をブロック表示にして見やすくする
         
         // 表示モードが切り替わった時に変数を更新して再描画
         datesSet: function(info) {
@@ -71,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 while (checkDate <= endDate) {
                     const dateStr = checkDate.toLocaleDateString('sv-SE');
                     
-                    // --- 休講・振替の魔法判定 ---
+                    // --- 休講・振替の判定 ---
                     let dayKey = { 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri' }[checkDate.getDay()];
                     let isSubstitute = false;
                     let subDayName = "";
@@ -82,30 +84,26 @@ document.addEventListener('DOMContentLoaded', function () {
                         isSubstitute = true;
                         subDayName = { 'mon': '月', 'tue': '火', 'wed': '水', 'thu': '木', 'fri': '金' }[dayKey];
                         
-                        // ★追加: 授業の有無に関係なく全員に「振替日」のバッジを表示！
                         allEvents.push({
                             title: `🔄 ${subDayName}曜授業の振替日`,
                             start: dateStr,
                             allDay: true,
-                            color: '#f59e0b', // 目立つオレンジ
+                            color: '#f59e0b',
                             extendedProps: { description: `この日は${subDayName}曜日の授業スケジュールになります。`, isLocal: false }
                         });
                     }
 
-                    // ② 休日の判定（振替日は優先する）
+                    // ② 休日の判定
                     if (data.holidays && data.holidays.includes(dateStr) && !isSubstitute) {
                         dayKey = null; 
-                        
-                        // ★追加: 授業の有無に関係なく全員に「休日」のバッジを表示！
                         allEvents.push({
                             title: `🎌 休講日・祝日`,
                             start: dateStr,
                             allDay: true,
-                            color: '#ef4444', // 休みと分かる赤色
+                            color: '#ef4444',
                             extendedProps: { description: `授業はお休みです。`, isLocal: false }
                         });
                     }
-                    // ----------------------------
 
                     // ③ 授業がある日の処理
                     if (dayKey) {
@@ -117,33 +115,26 @@ document.addEventListener('DOMContentLoaded', function () {
                                 .sort((a, b) => a.period - b.period);
 
                             if (todayCourses.length > 0) {
-                                if (isMonthView) {
-                                    const detailsText = todayCourses.map(c => {
-                                        const t = data.period_times[c.period] || {start: '??:??', end: '??:??'};
-                                        return `${c.period}限 (${t.start}〜${t.end}) : ${c.name}`;
-                                    }).join('\n');
-
-                                    const eventTitle = isSubstitute ? `📖 授業(${subDayName}振替) ${todayCourses.length}件` : `📖 授業 ${todayCourses.length}件`;
+                                // 月表示でも週・日表示でも、常に個別の授業を表示（同期）
+                                todayCourses.forEach(c => {
+                                    const time = data.period_times[c.period] || {start: '00:00', end: '00:00'};
+                                    const eventTitle = isSubstitute ? `${c.period}限(振替): ${c.name}` : `${c.period}限: ${c.name}`;
                                     
                                     allEvents.push({
-                                        title: eventTitle, start: dateStr, allDay: true, 
+                                        title: eventTitle, 
+                                        start: `${dateStr}T${time.start}:00`, 
+                                        end: `${dateStr}T${time.end}:00`,
+                                        allDay: false, 
                                         color: isSubstitute ? '#d97706' : '#64748b', 
-                                        extendedProps: { isCourseSummary: true, details: detailsText }
+                                        textColor: '#ffffff', // 読みやすく白文字に
+                                        extendedProps: { 
+                                            isCourseDetail: true, 
+                                            period: c.period, 
+                                            startTime: time.start, 
+                                            endTime: time.end 
+                                        }
                                     });
-                                } else {
-                                    todayCourses.forEach(c => {
-                                        const time = data.period_times[c.period] || {start: '00:00', end: '00:00'};
-                                        const eventTitle = isSubstitute ? `${c.period}限(振替): ${c.name}` : `${c.period}限: ${c.name}`;
-                                        allEvents.push({
-                                            title: eventTitle, start: `${dateStr}T${time.start}:00`, end: `${dateStr}T${time.end}:00`,
-                                            allDay: false, 
-                                            color: isSubstitute ? '#fef3c7' : '#e2e8f0', 
-                                            textColor: isSubstitute ? '#b45309' : '#475569', 
-                                            borderColor: isSubstitute ? '#fcd34d' : '#cbd5e1',
-                                            extendedProps: { isCourseDetail: true, period: c.period, startTime: time.start, endTime: time.end }
-                                        });
-                                    });
-                                }
+                                });
                             }
                         }
                     }
@@ -283,23 +274,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const today = new Date().toLocaleDateString('sv-SE');
 
-        // 1. 当日のイベントをフィルタリング（個別授業の詳細は除外してサマリーのみ表示）
-        const items = allEvents.filter(e => {
+        // 1. 当日のイベントをフィルタリング
+        let items = allEvents.filter(e => {
             let eventDate = "";
             if (e.start) {
                 eventDate = (typeof e.start === 'string') ? e.start.split("T")[0] : e.start.toLocaleDateString('sv-SE');
             } else {
                 eventDate = e.date;
             }
-            return eventDate === today && !e.extendedProps?.isCourseDetail;
+            return eventDate === today;
         });
+
+        // 授業の詳細（isCourseDetail）がある場合は、サマリー（isCourseSummary）を表示しない
+        const hasCourseDetails = items.some(e => e.extendedProps?.isCourseDetail);
+        if (hasCourseDetails) {
+            items = items.filter(e => !e.extendedProps?.isCourseSummary);
+        }
 
         if (items.length === 0) {
             list.innerHTML = '<li class="task"><div class="task-content"><div class="task-title">今日の予定はありません</div></div></li>';
             return;
         }
 
-        // 2. 時刻順にソート（時刻なしを優先）
+        // 2. 時刻順にソート
         items.sort((a, b) => {
             const timeA = a.extendedProps?.startTime || "00:00";
             const timeB = b.extendedProps?.startTime || "00:00";
@@ -314,7 +311,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const timeRange = isAllDay ? "終日" : (endTime ? `${startTime} - ${endTime}` : startTime);
             
             const color = e.color || '#4da6ff';
-            const title = e.extendedProps?.isCourseSummary ? '本日の授業予定' : e.title;
+            let title = e.title;
+            if (e.extendedProps?.isCourseSummary) title = '本日の授業予定';
+
             const description = e.extendedProps?.description || (e.extendedProps?.isCourseSummary ? '詳細はカレンダーをクリックして確認できます' : '');
 
             return `

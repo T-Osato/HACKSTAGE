@@ -347,3 +347,22 @@
     from { opacity: 1; transform: translateX(0); }
     to { opacity: 0; transform: translateX(30px); }
 }
+
+/* スマホ用レスポンシブ */
+@media screen and (max-width: 768px) {
+    .header-left {
+        gap: 15px;
+    }
+    
+    .site-title {
+        font-size: 16px;
+    }
+
+    .logout-button {
+        display: none; /* スマホではサイドメニューにあるので非表示 */
+    }
+
+    .user-icon-container {
+        margin-right: 5px;
+    }
+}
