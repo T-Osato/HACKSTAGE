@@ -280,9 +280,56 @@ document.addEventListener('DOMContentLoaded', function () {
     function showTodaySchedule(allEvents) {
         const list = document.getElementById("today-schedule-list");
         if (!list) return;
+
         const today = new Date().toLocaleDateString('sv-SE');
-        const items = allEvents.filter(e => (e.start ? e.start.split("T")[0] : e.date) === today && !e.extendedProps?.isCourseDetail);
-        list.innerHTML = items.length ? items.map(e => `<li class="task"><span style="background:${e.color || '#4da6ff'}; width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:8px;"></span>${e.extendedProps?.isCourseSummary ? '<strong>本日の授業予定</strong>' : e.title}</li>`).join('') : "<li>今日の予定はありません</li>";
+
+        // 1. 当日のイベントをフィルタリング（個別授業の詳細は除外してサマリーのみ表示）
+        const items = allEvents.filter(e => {
+            let eventDate = "";
+            if (e.start) {
+                eventDate = (typeof e.start === 'string') ? e.start.split("T")[0] : e.start.toLocaleDateString('sv-SE');
+            } else {
+                eventDate = e.date;
+            }
+            return eventDate === today && !e.extendedProps?.isCourseDetail;
+        });
+
+        if (items.length === 0) {
+            list.innerHTML = '<li class="task"><div class="task-content"><div class="task-title">今日の予定はありません</div></div></li>';
+            return;
+        }
+
+        // 2. 時刻順にソート（時刻なしを優先）
+        items.sort((a, b) => {
+            const timeA = a.extendedProps?.startTime || "00:00";
+            const timeB = b.extendedProps?.startTime || "00:00";
+            return timeA.localeCompare(timeB);
+        });
+
+        // 3. HTML構築
+        list.innerHTML = items.map(e => {
+            const startTime = e.extendedProps?.startTime;
+            const endTime = e.extendedProps?.endTime;
+            const isAllDay = !startTime;
+            const timeRange = isAllDay ? "終日" : (endTime ? `${startTime} - ${endTime}` : startTime);
+            
+            const color = e.color || '#4da6ff';
+            const title = e.extendedProps?.isCourseSummary ? '本日の授業予定' : e.title;
+            const description = e.extendedProps?.description || (e.extendedProps?.isCourseSummary ? '詳細はカレンダーをクリックして確認できます' : '');
+
+            return `
+                <li class="task">
+                    <div class="task-color-bar" style="background: ${color};"></div>
+                    <div class="task-content">
+                        <div class="task-header">
+                            <span class="task-time">${timeRange}</span>
+                            <span class="task-title">${title}</span>
+                        </div>
+                        ${description ? `<div class="task-description">${description}</div>` : ''}
+                    </div>
+                </li>
+            `;
+        }).join('');
     }
 
     document.getElementById("cancel-event").onclick = () => modal.classList.remove("show");
